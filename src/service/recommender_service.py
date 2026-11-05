@@ -99,7 +99,7 @@ class RecommenderService:
             "age": int(user["age"]),
             "gender": str(user["gender"]),
             "occupation": str(user["occupation"]),
-            "n_ratings": int(len(user_ratings)),
+            "n_ratings": len(user_ratings),
             "avg_rating": (
                 float(user_ratings["rating"].mean())
                 if not user_ratings.empty
@@ -129,7 +129,7 @@ class RecommenderService:
             stats.append(
                 {
                     "genre": genre,
-                    "count": int(len(subset)),
+                    "count": len(subset),
                     "avg_rating": float(subset["rating"].mean()),
                 }
             )
