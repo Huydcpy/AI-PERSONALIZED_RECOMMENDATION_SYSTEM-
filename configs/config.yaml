@@ -1,0 +1,7 @@
+seed: 42
+data:
+  raw_dir: data/raw
+  processed_dir: data/processed
+paths:
+  metrics_dir: reports/metrics
+  figures_dir: reports/figures

@@ -1,1 +1,154 @@
-# AI-PERSONALIZED_RECOMMENDATION_SYSTEM-
+# AI Personalized Recommendation System
+
+Hệ thống gợi ý phim cá nhân hóa xây dựng trên bộ dữ liệu **MovieLens 100K**, hướng tới một luồng end-to-end hoàn chỉnh: **data → model → service → giao diện Streamlit**.
+
+Mục tiêu của dự án:
+
+- Xây dựng pipeline dữ liệu sạch, chia train/test chống leakage.
+- Triển khai nhiều phương pháp gợi ý: Popularity, Content-Based, Item-CF, SVD, Hybrid.
+- Đánh giá bằng rating metrics (RMSE/MAE) và ranking metrics (Precision@K, Recall@K, NDCG@K).
+- Cung cấp giao diện web để chọn user, xem hồ sơ, nhận top-K gợi ý và so sánh phương pháp.
+
+## Công nghệ sử dụng
+
+| Thành phần | Công nghệ |
+|---|---|
+| Ngôn ngữ | Python 3.11 |
+| Xử lý dữ liệu | pandas, NumPy, PyArrow (Parquet) |
+| Machine Learning | scikit-surprise, scikit-learn, SciPy |
+| Giao diện | Streamlit |
+| Trực quan hóa | Matplotlib, Seaborn |
+| Kiểm thử & chất lượng code | pytest, ruff |
+| CI | GitHub Actions |
+| Cấu hình | YAML (`configs/config.yaml`) |
+
+## Kiến trúc tổng quan
+
+Dự án được tổ chức theo kiến trúc phân lớp, tách biệt rõ ràng giữa dữ liệu, model, đánh giá, service và giao diện.
+
+```mermaid
+flowchart TD
+    A[MovieLens 100K<br/>raw data] --> B[Data Pipeline<br/>download → preprocess → split]
+    B --> C[(data/processed<br/>ratings / movies / users / train / test)]
+
+    C --> D[Models<br/>Popularity · Content-Based · Item-CF · SVD · Hybrid]
+    C --> E[Evaluation<br/>RMSE/MAE · Precision@K/Recall@K/NDCG@K]
+    D --> E
+    E --> F[(reports/metrics<br/>baseline.json ...)]
+
+    D --> G[RecommenderService<br/>src/service]
+    C --> G
+    F --> G
+
+    G --> H[Streamlit App<br/>app/Home.py + pages/]
+    H --> I[Người dùng<br/>chọn user → xem top-K gợi ý]
+```
+
+### Các lớp chính
+
+1. **Data layer (`src/data`)** — Tải dữ liệu, chuẩn hóa schema, validate, lưu Parquet và chia train/test (`u1.base` / `u1.test`).
+2. **Model layer (`src/models`)** — Mỗi recommender implement chung contract `Recommender` (Protocol), trả về danh sách `Recommendation` gồm `movie_id`, `title`, `score`, `method`, `reason`.
+3. **Evaluation layer (`src/evaluation`)** — Tính rating metrics và ranking metrics; kết quả ghi ra `reports/metrics/`.
+4. **Service layer (`src/service`)** — `RecommenderService` là điểm truy cập duy nhất cho UI: load dữ liệu, quản lý model, xử lý user không tồn tại, trả metrics.
+5. **Presentation layer (`app/`)** — Streamlit app gồm 5 trang: Home, User Profile, Recommendations, Similar Movies, Compare Methods, Evaluation.
+
+### Nguyên tắc thiết kế
+
+- **Tách biệt UI và model**: app chỉ gọi qua `RecommenderService`, không import trực tiếp `src.models`.
+- **Contract thống nhất**: mọi model tuân theo `src/models/base.py`.
+- **Chống leakage**: test chỉ dùng một lần để đánh giá, không dùng để fit/tuning; lịch sử user chỉ lấy từ train.
+- **Tái lập được**: seed cố định `42`, cấu hình tập trung trong `configs/`.
+- **Cache**: `st.cache_data` cho dữ liệu/JSON, `st.cache_resource` cho service.
+
+## Cấu trúc repository (dự kiến)
+
+```text
+.
+├── app/                    # Streamlit app (Home + pages + components)
+├── configs/                # Cấu hình dự án (config.yaml)
+├── data/
+│   ├── raw/                # Dữ liệu gốc MovieLens (không commit)
+│   └── processed/          # Parquet đã xử lý (không commit)
+├── docs/                   # Data card, evaluation protocol
+├── models/                 # Model artifacts (không commit)
+├── notebooks/              # EDA, thử nghiệm
+├── reports/
+│   ├── figures/            # Biểu đồ EDA
+│   └── metrics/            # Kết quả đánh giá (JSON)
+├── scripts/                # run_baseline.py, smoke_surprise.py
+├── src/
+│   ├── data/               # download, preprocess, splits
+│   ├── models/             # base contract + các recommender
+│   ├── evaluation/         # rating & ranking metrics
+│   └── service/            # RecommenderService
+├── tests/                  # Unit tests
+├── requirements.txt
+└── README.md
+```
+
+## Dataset
+
+- **MovieLens 100K** (GroupLens): 100.000 ratings, 943 users, 1.682 movies.
+- Đánh giá tường minh (explicit feedback), thang điểm 1–5.
+- Split chuẩn: `u1.base` (80.000) / `u1.test` (20.000).
+- Độ thưa: `1 - 100000 / (943 × 1682) ≈ 93,7%`.
+- Nguồn: <https://files.grouplens.org/datasets/movielens/ml-100k.zip>
+- License: theo điều khoản sử dụng của GroupLens.
+
+## Cài đặt
+
+Yêu cầu Python 3.11.
+
+```bash
+python3.11 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+> Nếu cài `scikit-surprise` lỗi, thử: `pip install "numpy<2.0" cython` rồi cài lại `scikit-surprise==1.1.4`.
+
+## Chạy dự án
+
+```bash
+# 1. Tải và xử lý dữ liệu
+python -m src.data.download
+python -m src.data.preprocess
+python -m src.data.splits
+
+# 2. Huấn luyện baseline và đánh giá
+python scripts/run_baseline.py
+
+# 3. Kiểm tra môi trường Surprise (không phải kết quả chính thức)
+python scripts/smoke_surprise.py
+
+# 4. Chạy test
+pytest -q
+
+# 5. Chạy giao diện
+streamlit run app/Home.py
+```
+
+## Kết quả Day 1
+
+| Model | RMSE | MAE | Ghi chú |
+|---|---|---|---|
+| Popularity (Bayesian average) | _cập nhật sau_ | _cập nhật sau_ | Baseline, dự đoán theo điểm phổ biến |
+
+Chi tiết trong `reports/metrics/baseline.json`.
+
+## Roadmap
+
+| Ngày | Nội dung |
+|---|---|
+| Day 1 | Data pipeline, popularity baseline, rating metrics, Streamlit skeleton |
+| Day 2 | Content-Based Filtering, trang Similar Movies |
+| Day 3 | Item-CF, ranking metrics (Precision@K, Recall@K, NDCG@K) |
+| Day 4 | SVD, Hybrid, trang so sánh phương pháp |
+| Day 5 | Hoàn thiện đánh giá, báo cáo và demo |
+
+## Hạn chế
+
+- Dữ liệu MovieLens 100K có từ 1997–1998, không phản ánh sở thích hiện tại.
+- Chỉ có explicit feedback, không có implicit signals (click, thời gian xem).
+- Genre thô, chưa khai thác nội dung phim (mô tả, poster, diễn viên).
+- Dữ liệu thưa (~93,7%) và có popularity bias.
