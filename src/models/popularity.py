@@ -52,7 +52,7 @@ class PopularityRecommender:
         if "user_id" in df.columns and "movie_id" in df.columns:
             seen: dict[int, set[int]] = {}
             for uid, g in df.groupby("user_id"):
-                seen[int(uid)] = set(int(x) for x in g["movie_id"].tolist())
+                seen[int(uid)] = {int(x) for x in g["movie_id"].tolist()}
             self._user_seen = seen
 
     def recommend(

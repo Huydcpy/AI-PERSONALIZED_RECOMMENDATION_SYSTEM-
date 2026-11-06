@@ -86,7 +86,7 @@ class RecommenderService:
             _m = "movie_id" if "movie_id" in self.ratings.columns else None
             if _u and _m:
                 for uid, g in self.ratings.groupby(_u):
-                    self._seen_by_user[int(uid)] = set(int(x) for x in g[_m].tolist())
+                    self._seen_by_user[int(uid)] = {int(x) for x in g[_m].tolist()}
 
     # ---------- data listing / lookup ----------
 
@@ -108,7 +108,7 @@ class RecommenderService:
             r = self.ratings[self.ratings["user_id"] == user_id]
             if r.empty:
                 raise KeyError(f"User {user_id} not found")
-            n_ratings = int(len(r))
+            n_ratings = len(r)
             avg = float(r["rating"].mean()) if "rating" in r.columns else 0.0
             # Top genres from this user's rated movies.
             top_genres: list[str] = []
@@ -117,7 +117,7 @@ class RecommenderService:
                 and "movie_id" in self.movies.columns
                 and "genres" in self.movies.columns
             ):
-                seen_ids = set(int(x) for x in r["movie_id"].tolist()) if "movie_id" in r.columns else set()
+                seen_ids = {int(x) for x in r["movie_id"].tolist()} if "movie_id" in r.columns else set()
                 movies = self.movies[self.movies["movie_id"].isin(seen_ids)]
                 from collections import Counter
 

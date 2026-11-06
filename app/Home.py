@@ -1,8 +1,10 @@
 import sys
 from pathlib import Path
+
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 import streamlit as st
+
 from src.service.recommender_service import RecommenderService
 
 st.set_page_config(page_title="AI Movie Recommender", layout="wide")
@@ -12,8 +14,11 @@ def get_service():
     return RecommenderService()
 
 st.title("🎬 AI-Personalized Recommendation System")
-st.markdown("### Welcome to Day 1 Baseline Recommender System")
-st.info("Dự án xây dựng hệ thống gợi ý phim cá nhân hóa.")
+st.markdown("### Welcome to Day 2 Content-Based Recommender System")
+st.info(
+    "Dự án xây dựng hệ thống gợi ý phim cá nhân hóa. "
+    "Đã hỗ trợ mô hình gợi ý Content-Based dựa trên đặc trưng thể loại phim."
+)
 
 try:
     service = get_service()

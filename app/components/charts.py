@@ -1,5 +1,6 @@
-import streamlit as st
 import pandas as pd
+import streamlit as st
+
 
 def render_simple_bar_chart(df: pd.DataFrame, x_col: str, y_col: str, title: str):
     st.subheader(title)
