@@ -28,5 +28,14 @@ jobs:
             echo "app must not import src.models directly"
             exit 1
           fi
+      - name: Prepare integration data
+        run: |
+          python -m src.data.download
+          python -m src.data.preprocess
+          python -m src.data.splits
       - name: Test
         run: pytest -q
+      - name: Content-Based smoke test
+        run: python scripts/smoke_content_based.py
+      - name: Surprise smoke test
+        run: python scripts/smoke_surprise.py

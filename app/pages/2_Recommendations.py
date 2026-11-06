@@ -28,8 +28,9 @@ if not users:
 user_id = st.selectbox("Chọn User ID", users)
 method = st.selectbox(
     "Phương pháp",
-    ["popularity"],
-    help="Các phương pháp khác sẽ có từ Day 2/3.",
+    ["popularity", "content_based"],
+    format_func=lambda value: {"popularity": "Popularity", "content_based": "Content-Based"}[value],
+    help="Content-Based dùng thể loại; Popularity dùng điểm phổ biến.",
 )
 k = st.slider("Số lượng gợi ý", min_value=5, max_value=20, value=10)
 exclude_seen = st.checkbox("Loại bỏ phim đã xem", value=True)
@@ -54,4 +55,4 @@ if st.button("Lấy gợi ý", type="primary"):
                 movie = service.get_movie(rec.movie_id)
             except (ValueError, RuntimeError):
                 movie = {"movie_id": rec.movie_id, "title": rec.title}
-            render_movie_card(movie, rec.score, rec.reason)
+            render_movie_card(movie, rec.score, rec.reason, rec.method)
