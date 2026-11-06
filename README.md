@@ -60,10 +60,12 @@ flowchart TD
 - **Tái lập được**: seed cố định `42`, cấu hình tập trung trong `configs/`.
 - **Cache**: `st.cache_data` cho dữ liệu/JSON, `st.cache_resource` cho service.
 
-## Cấu trúc repository (dự kiến)
+## Cấu trúc repository
 
 ```text
 .
+├── .github/
+│   └── workflows/ci.yml    # Lint + test trên GitHub Actions
 ├── app/                    # Streamlit app (Home + pages + components)
 ├── configs/                # Cấu hình dự án (config.yaml)
 ├── data/
@@ -121,8 +123,9 @@ python scripts/run_baseline.py
 # 3. Kiểm tra môi trường Surprise (không phải kết quả chính thức)
 python scripts/smoke_surprise.py
 
-# 4. Chạy test
+# 4. Chạy test và lint
 pytest -q
+ruff check .
 
 # 5. Chạy giao diện
 streamlit run app/Home.py
@@ -132,7 +135,7 @@ streamlit run app/Home.py
 
 | Model | RMSE | MAE | Ghi chú |
 |---|---|---|---|
-| Popularity (Bayesian average) | _cập nhật sau_ | _cập nhật sau_ | Baseline, dự đoán theo điểm phổ biến |
+| Popularity (Bayesian average) | 1.06698 | 0.86310 | Baseline, dự đoán theo điểm phổ biến |
 
 Chi tiết trong `reports/metrics/baseline.json`.
 
@@ -140,7 +143,7 @@ Chi tiết trong `reports/metrics/baseline.json`.
 
 | Ngày | Nội dung |
 |---|---|
-| Day 1 | Data pipeline, popularity baseline, rating metrics, Streamlit skeleton |
+| Day 1 | Data pipeline, popularity baseline, rating metrics, Streamlit app |
 | Day 2 | Content-Based Filtering, trang Similar Movies |
 | Day 3 | Item-CF, ranking metrics (Precision@K, Recall@K, NDCG@K) |
 | Day 4 | SVD, Hybrid, trang so sánh phương pháp |
