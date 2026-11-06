@@ -65,13 +65,24 @@ class RecommenderService:
     def _init_models(self) -> None:
         if self.train_df is None or self.movies_df is None:
             return
+
+        popularity = None
         try:
             from src.models.popularity import PopularityRecommender
+
+            popularity = PopularityRecommender(self.train_df, self.movies_df)
+            self.models["popularity"] = popularity
         except ImportError:
-            return
-        self.models["popularity"] = PopularityRecommender(
-            self.train_df, self.movies_df
-        )
+            pass
+
+        try:
+            from src.models.content_based import ContentBasedRecommender
+
+            self.models["content_based"] = ContentBasedRecommender(
+                self.train_df, self.movies_df, fallback=popularity
+            )
+        except ImportError:
+            pass
 
     def list_users(self) -> list[int]:
         """Trả về danh sách user_id có trong dữ liệu."""
@@ -204,26 +215,47 @@ class RecommenderService:
         """Gợi ý top-k phim cho người dùng bằng phương pháp đã chọn."""
         model = self.models.get(method)
         if model is None:
-            if method == "popularity":
+            if method == "content_based":
+                model = self.models.get("popularity")
+                if model is None:
+                    raise RuntimeError(
+                        "ContentBasedRecommender chưa sẵn sàng: "
+                        "thiếu model hoặc dữ liệu train/movies"
+                    )
+            elif method == "popularity":
                 raise RuntimeError(
                     "PopularityRecommender chưa sẵn sàng: "
                     "thiếu model hoặc dữ liệu train/movies"
                 )
-            raise ValueError(f"Method {method} sẽ có từ Day 2/3")
+            else:
+                raise ValueError(f"Method {method} sẽ có từ Day 3/4")
         return model.recommend(
             user_id=user_id, k=k, exclude_seen=exclude_seen
         )
 
     def similar_items(
-        self, movie_id: int, k: int = 10
+        self,
+        movie_id: int,
+        k: int = 10,
+        method: str = "content_based",
     ) -> list[Recommendation]:
         """Gợi ý các phim tương tự với một bộ phim."""
-        model = self.models.get("popularity")
+        model = self.models.get(method)
         if model is None:
-            raise RuntimeError(
-                "PopularityRecommender chưa sẵn sàng: "
-                "thiếu model hoặc dữ liệu train/movies"
-            )
+            if method == "content_based":
+                model = self.models.get("popularity")
+                if model is None:
+                    raise RuntimeError(
+                        "ContentBasedRecommender chưa sẵn sàng: "
+                        "thiếu model hoặc dữ liệu train/movies"
+                    )
+            elif method == "popularity":
+                raise RuntimeError(
+                    "PopularityRecommender chưa sẵn sàng: "
+                    "thiếu model hoặc dữ liệu train/movies"
+                )
+            else:
+                raise ValueError(f"Method {method} sẽ có từ Day 3/4")
         return model.similar_items(movie_id=movie_id, k=k)
 
     def get_baseline_metrics(self) -> dict:
