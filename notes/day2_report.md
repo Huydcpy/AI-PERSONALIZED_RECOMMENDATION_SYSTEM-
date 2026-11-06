@@ -76,4 +76,5 @@ Phim `50` (Star Wars), top-3 tương tự:
 - Nhánh tích hợp: feat/day2-integration; giữ lịch sử của origin/feat/content-based và không push đè nhánh chung của PR #7. PR tích hợp được chuẩn bị riêng, chờ review trước khi merge.
 - CI tạo dữ liệu bằng download/preprocess/splits trước pytest và chạy cả hai smoke script. AppTest bắt buộc có dữ liệu khi CI chạy, không tự skip do thiếu dữ liệu.
 - Kiểm tra Chrome trực tiếp chưa hoàn tất: công cụ báo Computer Use app approval timed out. Đã kiểm chứng các luồng chính bằng Streamlit AppTest, không coi đây là kiểm tra trực quan bằng trình duyệt.
+- Đã commit local. Push bị auto-review từ chối do chưa có chấp thuận rõ ràng cho việc gửi code và báo cáo lên GitHub; chưa push, tạo PR mới hay xác nhận CI từ xa. Nội dung PR chuẩn bị trong notes/day2_pr.md.
 - Hạn chế: genre-only có nhiều điểm bằng nhau; chưa có ranking metrics. Day 3 tiếp tục Item-CF và đánh giá xếp hạng.
