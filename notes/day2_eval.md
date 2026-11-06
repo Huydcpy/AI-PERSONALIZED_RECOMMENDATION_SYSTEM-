@@ -113,5 +113,7 @@ Genres: crime, drama
 - Genre-only vectors produce ties and repeated recommendations; movie_id breaks ties deterministically.
 - Scores are cosine similarities, not predicted ratings. Popularity fallback uses its own rating score scale.
 - Qualitative correctness does not demonstrate ranking quality; ranking metrics remain Day 3.
-- Local tests after integrating the remote feature branch: all 38 passed, including Surprise, upstream model tests, and nonpositive-k regression tests.
+- Local tests after integrating the remote feature branch: all 41 passed, including Surprise, upstream model tests, and nonpositive-k regression tests.
+- GitHub Actions CI passed at commit `7804b97` (lint, app boundary, data preparation, pytest, both smoke scripts).
 - Streamlit AppTest covered Home and all five pages, recommendations for three users, and similar movies for three titles.
+- Streamlit was also started headless on port 8599; health check and root page returned OK, and the Home screen was captured at `reports/figures/day2_home.png`.

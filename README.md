@@ -188,6 +188,6 @@ User 1 top-5: 47: Ed Wood (1994); 65: What's Eating Gilbert Grape (1993); 150: S
 
 Toy Story similar top-5: 422: Aladdin and the King of Thieves (1996); 95: Aladdin (1992); 1219: Goofy Movie, A (1995); 63: Santa Clause, The (1994); 94: Home Alone (1990).
 
-Genre-only features are coarse and often tie. Content and Popularity scores have different scales. No Content-Based RMSE/MAE is claimed; Day 1 baseline metrics remain unchanged. Audit and examples: [Day 2 evaluation](notes/day2_eval.md).
+Genre-only features are coarse and often tie. Content and Popularity scores have different scales. No Content-Based RMSE/MAE is claimed; Day 1 baseline metrics remain unchanged. Audit and examples: [Day 2 evaluation](notes/day2_eval.md). Review record: [Day 2 review](notes/day2_review.md). Screenshot: [Home](reports/figures/day2_home.png). CI passed at commit `7804b97`.
 
-On Windows, building scikit-surprise 1.1.4 requires Microsoft C++ Build Tools. MSVC and Windows SDK are now installed locally; scikit-surprise 1.1.4 built successfully and all 38 tests pass after integrating the remote feature branch. The Surprise smoke script passes with RMSE 0.9540. If Windows console encoding fails on Vietnamese output, set `$env:PYTHONIOENCODING = "utf-8"` before running the script in PowerShell.
+On Windows, building scikit-surprise 1.1.4 requires Microsoft C++ Build Tools. MSVC and Windows SDK are now installed locally; scikit-surprise 1.1.4 built successfully and all 41 tests pass after integrating the remote feature branch. The Surprise smoke script passes with RMSE 0.9540. If Windows console encoding fails on Vietnamese output, set `$env:PYTHONIOENCODING = "utf-8"` before running the script in PowerShell.

@@ -1,24 +1,30 @@
-# Báo cáo Day 2 — Huy (ML core + tích hợp, bản remote trước tích hợp)
+# Báo cáo Day 2 — Trạng thái cuối (07/11/2026)
 
 ## Đã xong
 
 - `src/models/content_based.py`: `ContentBasedRecommender` với genre-only 18 thể loại, chuẩn hóa L2, cosine similarity, mapping phim và fallback Popularity.
 - `src/service/recommender_service.py`: đăng ký `content_based`, hỗ trợ `recommend` và `similar_items(method=...)`, fallback Popularity khi model chưa sẵn sàng.
 - `tests/test_content_based.py`: 12 unit test với DataFrame giả, không phụ thuộc dữ liệu thật.
-- `notes/day2_report.md`: báo cáo này.
+- `scripts/smoke_content_based.py`: kiểm tra dữ liệu thật cho 3 user, 3 phim, cold-start và phim không genre.
+- App: Recommendations chọn Popularity/Content-Based, Similar Movies dùng Content-Based mặc định, Compare/Home đã cập nhật, card hiển thị method và reason.
+- Tài liệu: `notes/day2_eval.md`, `notes/day2_review.md`, `notes/day2_report.md`, README và CI.
 
 ## Kiểm tra
 
 ```text
-pytest -q        -> 28 passed
+pytest -q        -> 41 passed
 ruff check .     -> All checks passed
 app boundary     -> app/ không import trực tiếp src.models
+smoke content    -> pass (user 1/196/405, 3 phim, fallback 999999 và phim 267/1373)
+smoke surprise   -> RMSE 0.9540
+CI GitHub Actions -> success tại commit 7804b97
 ```
 
 - Top-10 content-based cho user `1`, `196`, `405`: không có phim đã xem trong train.
 - User `999999`: fallback Popularity, method `popularity`, reason `Fallback phổ biến (cold-start)`.
 - `similar_items` mặc định dùng `content_based`; phim không tồn tại raise `ValueError`.
 - Method chưa hỗ trợ raise `ValueError: Method item_cf sẽ có từ Day 3/4`.
+- Streamlit chạy headless: health check OK, root HTTP 200; ảnh Home tại `reports/figures/day2_home.png`. AppTest phủ Home, 5 trang, 3 user và 3 phim.
 
 ## Ví dụ
 
@@ -50,6 +56,13 @@ Phim `50` (Star Wars), top-3 tương tự:
 | 172 | 0.9129 | Cùng thể loại: Action, Adventure, Romance, Sci-Fi, War | Empire Strikes Back, The (1980) |
 | 271 | 0.8944 | Cùng thể loại: Action, Adventure, Sci-Fi, War | Starship Troopers (1997) |
 
+## Tích hợp và CI
+
+- PR #7 (model/service/test), PR #8 (tích hợp Day 2) và PR #10 (Linh Day 2) đã được merge vào `main`; PR #5 đã đóng.
+- CI tạo dữ liệu bằng download/preprocess/splits trước pytest, chạy `ruff check .`, kiểm tra boundary app, pytest và cả hai smoke script.
+- AppTest bắt buộc có dữ liệu khi CI chạy, không tự skip do thiếu dữ liệu.
+- Review hồi cứu được ghi tại `notes/day2_review.md`. Repo chỉ có một tài khoản maintainer nên GitHub không thể có approval chéo; toàn bộ kiểm tra đã được chạy lại trước khi chốt.
+
 ## Hạn chế
 
 - Genre-only nên gợi ý còn thô, các phim cùng thể loại có score bằng nhau rất nhiều.
@@ -57,24 +70,6 @@ Phim `50` (Star Wars), top-3 tương tự:
 - Cold-start và phim không có thể loại phụ thuộc Popularity.
 - Similarity matrix `1682 × 1682` float32 khoảng 11 MB, chấp nhận được.
 
-## Blocker và đề xuất Day 3
+## Đề xuất Day 3
 
-- Chờ Phong chạy smoke script/đánh giá định tính và Linh cập nhật app/README để review, merge PR.
-- Day 3: Item-CF, ranking metrics Precision@K/Recall@K/NDCG@K, đánh giá định lượng cho Content-Based.
-
-
----
-
-# Báo cáo Day 2
-
-- Đã triển khai ContentBasedRecommender với 18 thể loại, cosine similarity, profile từ train và Popularity fallback. Không thay đổi contract base.
-- Service hỗ trợ hai phương pháp; Similar Movies mặc định Content-Based. Hồ sơ user chuyển sang train để tránh dùng lịch sử test.
-- Recommendations chọn được hai phương pháp; Similar Movies và Compare hoạt động; card hiển thị method và reason. Home và README đã cập nhật.
-- Smoke test dữ liệu thật pass cho user 1, 196, 405 và Toy Story, Star Wars, Pulp Fiction; user lạ và hai phim không genre fallback đúng. Chi tiết trong day2_eval.md.
-- Local sau tích hợp remote: toàn bộ 38 test pass, gồm test Surprise, 12 test từ PR #7 và test hồi quy k không dương. Ruff và hai smoke script pass. AppTest chạy Home, 5 trang và các tương tác chính.
-- Đã cài MSVC và Windows SDK bằng Microsoft Build Tools trên ổ D, sau đó build và cài thành công scikit-surprise 1.1.4. Không bỏ qua test Surprise trong CI.
-- Nhánh tích hợp: feat/day2-integration; giữ lịch sử của origin/feat/content-based và không push đè nhánh chung của PR #7. PR tích hợp được chuẩn bị riêng, chờ review trước khi merge.
-- CI tạo dữ liệu bằng download/preprocess/splits trước pytest và chạy cả hai smoke script. AppTest bắt buộc có dữ liệu khi CI chạy, không tự skip do thiếu dữ liệu.
-- Kiểm tra Chrome trực tiếp chưa hoàn tất: công cụ báo Computer Use app approval timed out. Đã kiểm chứng các luồng chính bằng Streamlit AppTest, không coi đây là kiểm tra trực quan bằng trình duyệt.
-- Đã commit local. Push bị auto-review từ chối do chưa có chấp thuận rõ ràng cho việc gửi code và báo cáo lên GitHub; chưa push, tạo PR mới hay xác nhận CI từ xa. Nội dung PR chuẩn bị trong notes/day2_pr.md.
-- Hạn chế: genre-only có nhiều điểm bằng nhau; chưa có ranking metrics. Day 3 tiếp tục Item-CF và đánh giá xếp hạng.
+- Item-CF, ranking metrics Precision@K/Recall@K/NDCG@K, đánh giá định lượng cho Content-Based.
