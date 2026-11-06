@@ -1,4 +1,7 @@
 import pandas as pd
+import pytest
+
+pytest.importorskip("surprise")
 
 from src.data.surprise_dataset import build_surprise_trainset, build_testset
 

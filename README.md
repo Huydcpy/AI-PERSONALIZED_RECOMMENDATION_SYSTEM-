@@ -160,6 +160,28 @@ Chi tiết trong `reports/metrics/baseline.json`.
 
 Content-Based is available in the service, Recommendations, Similar Movies, and Compare Methods. It uses 18 known genres, L2 normalization, cosine similarity, and train-only profiles weighted by max(rating - 3, 0). Cold-start users, zero-genre movies, and short result lists use Popularity fallback. Cards show the actual method and reason.
 
+Method key la `content_based` (goi qua `service.recommend(user_id, method="content_based", k=k)` va mac dinh `service.similar_items(movie_id, k=k)`). Ly do hien thi: `Khop the loai: ...` cho goi y theo user va `Cung the loai: ...` cho Similar Movies.
+
+User `196`, Top-5 goi y Content-Based (`method="content_based"`, `k=5`, `exclude_seen=True`):
+
+| movie_id | Title | Score | Reason |
+|---|---|---|---|
+| 34 | Doom Generation, The (1995) | 0.9136 | Khop the loai: Comedy, Drama |
+| 45 | Eat Drink Man Woman (1994) | 0.9136 | Khop the loai: Comedy, Drama |
+| 47 | Ed Wood (1994) | 0.9136 | Khop the loai: Comedy, Drama |
+| 65 | What's Eating Gilbert Grape (1993) | 0.9136 | Khop the loai: Comedy, Drama |
+| 93 | Welcome to the Dollhouse (1995) | 0.9136 | Khop the loai: Comedy, Drama |
+
+Phim `1` — Toy Story (1995), Top-5 phim tuong tu (`similar_items(movie_id=1, k=5)`):
+
+| movie_id | Title | Score | Reason |
+|---|---|---|---|
+| 422 | Aladdin and the King of Thieves (1996) | 1.0000 | Cung the loai: Animation, Children, Comedy |
+| 95 | Aladdin (1992) | 0.8660 | Cung the loai: Animation, Children, Comedy |
+| 1219 | Goofy Movie, A (1995) | 0.8660 | Cung the loai: Animation, Children, Comedy |
+| 63 | Santa Clause, The (1994) | 0.8165 | Cung the loai: Children, Comedy |
+| 94 | Home Alone (1990) | 0.8165 | Cung the loai: Children, Comedy |
+
 Run `python scripts/smoke_content_based.py` and `python -m pytest -q`. On this workspace, use `.\.venv\python.exe` in place of `python`.
 
 User 1 top-5: 47: Ed Wood (1994); 65: What's Eating Gilbert Grape (1993); 150: Swingers (1996); 236: Citizen Ruth (1996); 316: As Good As It Gets (1997).
