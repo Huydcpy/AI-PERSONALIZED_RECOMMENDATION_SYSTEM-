@@ -36,7 +36,7 @@ def format_genres(movie: dict) -> str:
 
 
 def render_movie_card(
-    movie: dict, score: float, reason: str | None = None
+    movie: dict, score: float, reason: str | None = None, method: str | None = None
 ) -> None:
     """Render one recommendation card."""
     title = movie.get("title") or "Không rõ"
@@ -47,5 +47,7 @@ def render_movie_card(
             f"Thể loại: {format_genres(movie)}"
         )
         st.metric("Điểm", f"{score:.3f}")
+        if method:
+            st.caption(f"Phương pháp: {method}")
         if reason:
             st.info(f"Lý do: {reason}")

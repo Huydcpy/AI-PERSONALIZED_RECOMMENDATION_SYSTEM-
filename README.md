@@ -144,7 +144,7 @@ Chi tiết trong `reports/metrics/baseline.json`.
 | Ngày | Nội dung |
 |---|---|
 | Day 1 | Data pipeline, popularity baseline, rating metrics, Streamlit app |
-| Day 2 | Content-Based Filtering, trang Similar Movies |
+| Day 2 | Đã triển khai Content-Based Filtering, Similar Movies và Compare Methods; kiểm chứng local trong notes/day2_eval.md |
 | Day 3 | Item-CF, ranking metrics (Precision@K, Recall@K, NDCG@K) |
 | Day 4 | SVD, Hybrid, trang so sánh phương pháp |
 | Day 5 | Hoàn thiện đánh giá, báo cáo và demo |
@@ -155,3 +155,17 @@ Chi tiết trong `reports/metrics/baseline.json`.
 - Chỉ có explicit feedback, không có implicit signals (click, thời gian xem).
 - Genre thô, chưa khai thác nội dung phim (mô tả, poster, diễn viên).
 - Dữ liệu thưa (~93,7%) và có popularity bias.
+
+## Day 2 results
+
+Content-Based is available in the service, Recommendations, Similar Movies, and Compare Methods. It uses 18 known genres, L2 normalization, cosine similarity, and train-only profiles weighted by max(rating - 3, 0). Cold-start users, zero-genre movies, and short result lists use Popularity fallback. Cards show the actual method and reason.
+
+Run `python scripts/smoke_content_based.py` and `python -m pytest -q`. On this workspace, use `.\.venv\python.exe` in place of `python`.
+
+User 1 top-5: 47: Ed Wood (1994); 65: What's Eating Gilbert Grape (1993); 150: Swingers (1996); 236: Citizen Ruth (1996); 316: As Good As It Gets (1997).
+
+Toy Story similar top-5: 422: Aladdin and the King of Thieves (1996); 95: Aladdin (1992); 1219: Goofy Movie, A (1995); 63: Santa Clause, The (1994); 94: Home Alone (1990).
+
+Genre-only features are coarse and often tie. Content and Popularity scores have different scales. No Content-Based RMSE/MAE is claimed; Day 1 baseline metrics remain unchanged. Audit and examples: [Day 2 evaluation](notes/day2_eval.md).
+
+On Windows, building scikit-surprise 1.1.4 requires Microsoft C++ Build Tools. MSVC and Windows SDK are now installed locally; scikit-surprise 1.1.4 built successfully and all 38 tests pass after integrating the remote feature branch. The Surprise smoke script passes with RMSE 0.9540. If Windows console encoding fails on Vietnamese output, set `$env:PYTHONIOENCODING = "utf-8"` before running the script in PowerShell.

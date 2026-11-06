@@ -35,6 +35,8 @@ class PopularityRecommender:
         self, user_id: int, k: int = 10, exclude_seen: bool = True
     ) -> list[Recommendation]:
         """Trả về top-k phim phổ biến, loại phim user đã xem nếu cần."""
+        if k <= 0:
+            return []
         seen = {
             int(movie_id)
             for movie_id in self.train_df.loc[
@@ -63,6 +65,8 @@ class PopularityRecommender:
         self, movie_id: int, k: int = 10
     ) -> list[Recommendation]:
         """Fallback Day 1: trả về các phim phổ biến khác."""
+        if k <= 0:
+            return []
         candidates = [
             (mid, score)
             for mid, score in self.scores.items()

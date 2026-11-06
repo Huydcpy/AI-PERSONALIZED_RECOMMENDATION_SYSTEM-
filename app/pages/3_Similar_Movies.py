@@ -14,7 +14,7 @@ from app.components.service import get_service
 
 st.title("Phim tương tự")
 st.info(
-    "Day 1 dùng fallback popularity. Content-Based sẽ thay thế ở Day 2."
+    "Tìm phim tương tự theo thể loại. Phim không có tín hiệu dùng Popularity."
 )
 
 try:
@@ -60,4 +60,4 @@ if st.button("Tìm phim tương tự", type="primary"):
                 movie = service.get_movie(rec.movie_id)
             except (ValueError, RuntimeError):
                 movie = {"movie_id": rec.movie_id, "title": rec.title}
-            render_movie_card(movie, rec.score, rec.reason)
+            render_movie_card(movie, rec.score, rec.reason, rec.method)

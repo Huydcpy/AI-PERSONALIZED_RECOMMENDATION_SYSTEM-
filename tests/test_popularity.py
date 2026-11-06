@@ -51,3 +51,10 @@ def test_similar_items_excludes_itself():
     recs = model.similar_items(1, k=10)
     assert recs
     assert all(rec.movie_id != 1 for rec in recs)
+
+
+@pytest.mark.parametrize("k", [0, -1, -10])
+def test_nonpositive_k_returns_no_recommendations(k):
+    model = make_model()
+    assert model.recommend(1, k=k) == []
+    assert model.similar_items(1, k=k) == []

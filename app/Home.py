@@ -18,10 +18,11 @@ st.markdown(
     "Hệ thống gợi ý phim cá nhân hóa trên bộ dữ liệu MovieLens 100K."
 )
 
-st.subheader("Mục tiêu Day 1")
+st.subheader("Chức năng Day 2")
 st.markdown(
     "- Pipeline dữ liệu: download, preprocess, split\n"
     "- Baseline: Popularity với Bayesian average\n"
+    "- Content-Based: gợi ý cá nhân hóa và phim tương tự theo thể loại\n"
     "- Đánh giá: RMSE và MAE\n"
     "- Giao diện: 5 trang Streamlit dùng chung service layer"
 )
