@@ -1,23 +1,37 @@
 import sys
 from pathlib import Path
 
-sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
-
 import streamlit as st
 
-from src.service.recommender_service import RecommenderService
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
-st.set_page_config(page_title="Evaluation", layout="wide")
+st.set_page_config(page_title="Đánh giá mô hình", layout="wide")
 
-@st.cache_resource
-def get_service():
-    return RecommenderService()
+from app.components.service import get_metrics
 
-service = get_service()
-st.title("📈 Đánh giá mô hình (Baseline Metrics)")
+st.title("Đánh giá mô hình")
 
-metrics = service.get_baseline_metrics()
-if metrics:
-    st.json(metrics)
+try:
+    metrics = get_metrics()
+except (OSError, ValueError, RuntimeError) as exc:
+    st.error(f"Không thể đọc baseline metrics: {exc}")
+    metrics = {}
+
+if not metrics:
+    st.warning(
+        "Chưa có reports/metrics/baseline.json. "
+        "Hãy chạy python scripts/run_baseline.py."
+    )
 else:
-    st.warning("Chưa có báo cáo reports/metrics/baseline.json. Ranking metrics sẽ bổ sung ở Day 3.")
+    col1, col2 = st.columns(2)
+    rmse = metrics.get("rmse")
+    mae = metrics.get("mae")
+    col1.metric("RMSE", f"{float(rmse):.4f}" if rmse is not None else "N/A")
+    col2.metric("MAE", f"{float(mae):.4f}" if mae is not None else "N/A")
+    st.json(metrics)
+
+st.caption(
+    "Ranking metrics (Precision@K, Recall@K, NDCG@K) sẽ có ở Day 3."
+)

@@ -1,72 +1,63 @@
 import sys
 from pathlib import Path
 
-sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
-
 import streamlit as st
 
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+st.set_page_config(page_title="Phim tương tự", layout="wide")
+
 from app.components.movie_card import render_movie_card
-from src.service.recommender_service import RecommenderService
+from app.components.service import get_service
 
-st.set_page_config(page_title="Similar Movies", layout="wide")
-
-@st.cache_resource
-def get_service():
-    return RecommenderService()
+st.title("Phim tương tự")
+st.info(
+    "Tìm phim tương tự theo thể loại. Phim không có tín hiệu dùng Popularity."
+)
 
 try:
     service = get_service()
-except Exception as e:
-    service = None
-    st.warning(f"Không thể khởi tạo service: {e}")
+except (OSError, ValueError, RuntimeError) as exc:
+    st.error(f"Không thể khởi tạo service: {exc}")
+    st.stop()
 
-st.title("🔍 Phim Tương Tự")
+query = st.text_input("Tìm phim", placeholder="Ví dụ: Toy Story")
+if not query.strip():
+    st.caption("Nhập tên phim để tìm.")
+    st.stop()
 
-movie_id = st.number_input("Nhập Movie ID:", min_value=1, value=1)
-k = st.slider("Số lượng phim tương tự:", 5, 20, 10)
+try:
+    matches = service.search_movies(query, limit=50)
+except (ValueError, RuntimeError) as exc:
+    st.error(str(exc))
+    st.stop()
 
-if st.button("Tìm phim tương tự"):
-    if service is None:
-        st.warning("Service chưa sẵn sàng. Vui lòng thử lại sau.")
+if not matches:
+    st.warning("Không tìm thấy phim phù hợp.")
+    st.stop()
+
+options = {
+    f"{movie['title']} ({movie['movie_id']})": movie["movie_id"]
+    for movie in matches
+}
+selected = st.selectbox("Chọn phim", list(options))
+k = st.slider("Số lượng phim tương tự", min_value=5, max_value=20, value=10)
+
+if st.button("Tìm phim tương tự", type="primary"):
+    try:
+        recommendations = service.similar_items(options[selected], k=k)
+    except (ValueError, RuntimeError) as exc:
+        st.error(str(exc))
+        st.stop()
+
+    if not recommendations:
+        st.warning("Không có phim tương tự.")
     else:
-        try:
-            recs = service.similar_items(movie_id, k=k)
-        except Exception as e:
-            st.warning(
-                f"Không tìm thấy phim tương tự cho Movie ID {movie_id}: {e}"
-            )
-        else:
-            if not recs:
-                st.warning(
-                    f"Không tìm thấy phim tương tự cho Movie ID {movie_id}. "
-                    "Vui lòng thử Movie ID khác."
-                )
-            else:
-                for rec in recs:
-                    if isinstance(rec, dict):
-                        rec_movie_id = rec.get("movie_id")
-                        title = rec.get("title", "")
-                        score = rec.get("score", 0.0)
-                        reason = rec.get("reason")
-                        genres = rec.get("genres") or rec.get("genre") or ""
-                    else:
-                        rec_movie_id = rec.movie_id
-                        title = rec.title
-                        score = rec.score
-                        reason = rec.reason
-                        genres = getattr(rec, "genres", "") or getattr(rec, "genre", "") or ""
-
-                    if reason:
-                        raw_reason = str(reason).strip()
-                        if raw_reason.startswith("Cùng thể loại"):
-                            display_reason = raw_reason
-                        else:
-                            display_reason = f"Cùng thể loại: {raw_reason}"
-                    elif genres:
-                        display_reason = f"Cùng thể loại: {genres}"
-                    else:
-                        display_reason = "Cùng thể loại: ..."
-
-                    render_movie_card(
-                        rec_movie_id, title, score, genres=genres, reason=display_reason
-                    )
+        for rec in recommendations:
+            try:
+                movie = service.get_movie(rec.movie_id)
+            except (ValueError, RuntimeError):
+                movie = {"movie_id": rec.movie_id, "title": rec.title}
+            render_movie_card(movie, rec.score, rec.reason, rec.method)

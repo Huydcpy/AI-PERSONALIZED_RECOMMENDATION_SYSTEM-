@@ -1,14 +1,21 @@
-"""Base contract for recommenders."""
-from __future__ import annotations
+"""Contract chung cho tất cả các recommender trong dự án."""
 
 from dataclasses import dataclass
-from typing import Protocol, runtime_checkable
-
-import pandas as pd
+from typing import Protocol
 
 
-@dataclass
+@dataclass(frozen=True)
 class Recommendation:
+    """Một gợi ý phim trả về cho người dùng.
+
+    Attributes:
+        movie_id: ID phim trong MovieLens.
+        title: Tiêu đề phim.
+        score: Điểm dự đoán/phù hợp do model tính.
+        method: Tên phương pháp sinh ra gợi ý (ví dụ: ``popularity``).
+        reason: Giải thích ngắn vì sao phim được gợi ý.
+    """
+
     movie_id: int
     title: str
     score: float
@@ -16,22 +23,37 @@ class Recommendation:
     reason: str | None = None
 
 
-@runtime_checkable
 class Recommender(Protocol):
-    """Protocol for recommender models.
-
-    Implementations must provide:
-    - name: str
-    - recommend(user_id, k=10, exclude_seen=True) -> list[Recommendation]
-    - similar_items(movie_id, k=10) -> list[Recommendation]
-    """
+    """Interface mà mọi recommender phải implement."""
 
     name: str
 
     def recommend(
         self, user_id: int, k: int = 10, exclude_seen: bool = True
-    ) -> list[Recommendation]: ...
+    ) -> list[Recommendation]:
+        """Trả về tối đa ``k`` phim gợi ý cho ``user_id``.
 
-    def similar_items(self, movie_id: int, k: int = 10) -> list[Recommendation]: ...
+        Args:
+            user_id: ID người dùng.
+            k: Số lượng gợi ý tối đa.
+            exclude_seen: Nếu True, loại các phim người dùng đã rating
+                trong tập train.
 
-    def fit(self, ratings_df: pd.DataFrame, items_df: pd.DataFrame | None = None) -> None: ...
+        Returns:
+            Danh sách ``Recommendation`` đã sắp xếp theo độ phù hợp giảm dần.
+        """
+        ...
+
+    def similar_items(
+        self, movie_id: int, k: int = 10
+    ) -> list[Recommendation]:
+        """Trả về tối đa ``k`` phim tương tự với ``movie_id``.
+
+        Args:
+            movie_id: ID phim gốc.
+            k: Số lượng phim tương tự tối đa.
+
+        Returns:
+            Danh sách ``Recommendation`` đã sắp xếp theo độ tương đồng giảm dần.
+        """
+        ...
