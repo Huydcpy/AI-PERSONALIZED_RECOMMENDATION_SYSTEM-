@@ -3,11 +3,12 @@ from dataclasses import replace
 import numpy as np
 from sklearn.preprocessing import normalize
 
-from src.data.preprocess import GENRES
+from src.data.preprocess import GENRES as DATA_GENRES
 from src.models.base import Recommendation
 from src.models.popularity import PopularityRecommender
 
-KNOWN_GENRES = [genre for genre in GENRES if genre != "unknown"]
+KNOWN_GENRES = [genre for genre in DATA_GENRES if genre != "unknown"]
+GENRES = tuple(KNOWN_GENRES)
 
 
 class ContentBasedRecommender:

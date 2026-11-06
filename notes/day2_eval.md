@@ -113,5 +113,5 @@ Genres: crime, drama
 - Genre-only vectors produce ties and repeated recommendations; movie_id breaks ties deterministically.
 - Scores are cosine similarities, not predicted ratings. Popularity fallback uses its own rating score scale.
 - Qualitative correctness does not demonstrate ranking quality; ranking metrics remain Day 3.
-- Local tests: all 23 passed, including Surprise, after installing Microsoft C++ Build Tools and building scikit-surprise 1.1.4.
+- Local tests after integrating the remote feature branch: all 38 passed, including Surprise, upstream model tests, and nonpositive-k regression tests.
 - Streamlit AppTest covered Home and all five pages, recommendations for three users, and similar movies for three titles.

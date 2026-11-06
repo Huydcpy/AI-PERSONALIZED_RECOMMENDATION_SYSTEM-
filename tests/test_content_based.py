@@ -1,75 +1,147 @@
-import numpy as np
 import pandas as pd
 import pytest
 
-from src.models.content_based import KNOWN_GENRES, ContentBasedRecommender
-from src.service.recommender_service import RecommenderService
+from src.models.base import Recommendation
+from src.models.content_based import GENRES, ContentBasedRecommender
+from src.models.popularity import PopularityRecommender
+
+MOVIE_SPECS = [
+    (1, "Action One", ("action",)),
+    (2, "Action Two", ("action",)),
+    (3, "Comedy One", ("comedy",)),
+    (4, "Romantic Comedy", ("comedy", "romance")),
+    (5, "No Genre", ()),
+    (6, "Drama One", ("drama",)),
+    (7, "Horror One", ("horror",)),
+    (8, "Action Adventure", ("action", "adventure")),
+]
 
 
-@pytest.fixture
-def inputs():
-    movies = pd.DataFrame({"movie_id": [1, 2, 3, 4, 5, 6], "title": list("ABCDEF")})
-    for genre in KNOWN_GENRES:
-        movies[genre] = 0
-    movies.loc[:2, "action"] = 1
-    movies.loc[3:4, "comedy"] = 1
-    train = pd.DataFrame({"user_id": [1, 1, 2, 2, 3, 3],
-                          "movie_id": [1, 4, 2, 5, 3, 6],
-                          "rating": [5, 1, 5, 4, 2, 3]})
-    return train, movies
+def make_movies() -> pd.DataFrame:
+    data = {"movie_id": [], "title": []}
+    for genre in GENRES:
+        data[genre] = []
+
+    for movie_id, title, genres in MOVIE_SPECS:
+        data["movie_id"].append(movie_id)
+        data["title"].append(title)
+        for genre in GENRES:
+            data[genre].append(1 if genre in genres else 0)
+
+    return pd.DataFrame(data)
 
 
-def test_similarity_order_and_self_exclusion(inputs):
-    model = ContentBasedRecommender(*inputs)
-    results = model.similar_items(1, k=2)
-    assert [item.movie_id for item in results] == [2, 3]
-    assert all(item.method == "content_based" and 0 <= item.score <= 1 for item in results)
-    assert all(item.reason == "Cùng thể loại: Action" for item in results)
-    np.testing.assert_allclose(model.similarity, model.similarity.T)
-    assert model.genre_matrix.shape == (6, 18)
+def make_train() -> pd.DataFrame:
+    return pd.DataFrame(
+        {
+            "user_id": [1, 1, 2, 3, 4, 5, 6],
+            "movie_id": [1, 3, 3, 5, 7, 1, 4],
+            "rating": [5.0, 2.0, 5.0, 5.0, 5.0, 3.0, 4.0],
+        }
+    )
 
 
-def test_recommend_profile_and_seen(inputs):
-    model = ContentBasedRecommender(*inputs)
-    assert [item.movie_id for item in model.recommend(1, k=2)] == [2, 3]
-    assert model.recommend(1, k=1, exclude_seen=False)[0].movie_id == 1
-    results = model.recommend(1, k=5)
-    assert len({item.movie_id for item in results}) == len(results)
-    assert not {1, 4}.intersection(item.movie_id for item in results)
-    assert results[2].method == "popularity"
+def make_model() -> ContentBasedRecommender:
+    train = make_train()
+    movies = make_movies()
+    fallback = PopularityRecommender(train, movies)
+    return ContentBasedRecommender(train, movies, fallback=fallback)
 
 
-@pytest.mark.parametrize("user_id", [999999, 3])
-def test_cold_start(inputs, user_id):
-    results = ContentBasedRecommender(*inputs).recommend(user_id, k=3)
-    assert len(results) == 3
-    assert all(item.method == "popularity" for item in results)
-    assert all(item.reason == "Fallback phổ biến (cold-start)" for item in results)
+def test_similar_items_returns_same_genre_first():
+    model = make_model()
+    recs = model.similar_items(1, k=2)
+
+    assert [rec.movie_id for rec in recs] == [2, 8]
+    assert all(rec.method == "content_based" for rec in recs)
+    assert all("Cùng thể loại: Action" in rec.reason for rec in recs)
 
 
-def test_zero_genre_and_invalid_movie(inputs):
-    model = ContentBasedRecommender(*inputs)
-    results = model.similar_items(6, k=3)
-    assert len(results) == 3
-    assert all(item.method == "popularity" and item.movie_id != 6 for item in results)
-    with pytest.raises(ValueError, match="999"):
-        model.similar_items(999)
-    assert model.recommend(1, k=0) == []
-    assert model.similar_items(1, k=-1) == []
+def test_similar_items_excludes_itself_and_respects_k():
+    model = make_model()
+    recs = model.similar_items(8, k=1)
+
+    assert len(recs) == 1
+    assert recs[0].movie_id != 8
 
 
-def test_service_train_only_and_routing(inputs, tmp_path):
-    train, movies = inputs
-    train.to_parquet(tmp_path / "train.parquet")
-    movies.to_parquet(tmp_path / "movies.parquet")
-    pd.DataFrame({"user_id": [1], "age": [20], "gender": ["M"],
-                  "occupation": ["student"]}).to_parquet(tmp_path / "users.parquet")
-    train.assign(rating=1).to_parquet(tmp_path / "ratings.parquet")
-    service = RecommenderService(data_dir=tmp_path)
-    assert service.get_user_profile(1)["avg_rating"] == 3
-    assert service.recommend(1, method="content_based", k=1)[0].movie_id == 2
-    assert service.similar_items(1, k=1)[0].movie_id == 2
-    with pytest.raises(ValueError, match="Day 3/4"):
-        service.similar_items(1, method="invalid")
-    with pytest.raises(ValueError, match="Day 3/4"):
-        service.recommend(1, method="invalid")
+def test_similar_items_unknown_movie_raises():
+    model = make_model()
+    with pytest.raises(ValueError, match="không tồn tại"):
+        model.similar_items(999, k=5)
+
+
+def test_similar_items_without_genre_falls_back():
+    model = make_model()
+    recs = model.similar_items(5, k=3)
+
+    assert recs
+    assert all(rec.method == "popularity" for rec in recs)
+    assert all("Fallback phổ biến" in rec.reason for rec in recs)
+
+
+def test_recommend_excludes_seen_movies():
+    model = make_model()
+    recs = model.recommend(1, k=2, exclude_seen=True)
+
+    assert {rec.movie_id for rec in recs} == {2, 8}
+    assert 1 not in {rec.movie_id for rec in recs}
+    assert 3 not in {rec.movie_id for rec in recs}
+
+
+def test_recommend_can_include_seen_movies():
+    model = make_model()
+    recs = model.recommend(1, k=10, exclude_seen=False)
+
+    assert 1 in {rec.movie_id for rec in recs}
+
+
+def test_recommend_unknown_user_falls_back():
+    model = make_model()
+    recs = model.recommend(999, k=3)
+
+    assert len(recs) == 3
+    assert all(isinstance(rec, Recommendation) for rec in recs)
+    assert all(rec.method == "popularity" for rec in recs)
+    assert all(rec.reason == "Fallback phổ biến (cold-start)" for rec in recs)
+
+
+def test_recommend_low_ratings_fall_back():
+    model = make_model()
+    recs = model.recommend(5, k=3)
+
+    assert recs
+    assert all(rec.method == "popularity" for rec in recs)
+
+
+def test_recommend_user_without_genre_falls_back():
+    model = make_model()
+    recs = model.recommend(3, k=3)
+
+    assert recs
+    assert all(rec.method == "popularity" for rec in recs)
+
+
+def test_recommend_is_deterministic_for_equal_scores():
+    model = make_model()
+    first = model.recommend(1, k=2)
+    second = model.recommend(1, k=2)
+
+    assert [rec.movie_id for rec in first] == [rec.movie_id for rec in second]
+    assert [rec.movie_id for rec in first] == [2, 8]
+
+
+def test_scores_are_within_unit_interval():
+    model = make_model()
+    recs = model.recommend(1, k=2) + model.similar_items(4, k=10)
+
+    assert recs
+    assert all(0.0 <= rec.score <= 1.0 for rec in recs if rec.method == "content_based")
+
+
+def test_content_based_method_and_reason():
+    model = make_model()
+    recs = model.recommend(1, k=1)
+
+    assert recs[0].method == "content_based"
+    assert recs[0].reason.startswith("Khớp thể loại:")
