@@ -2,6 +2,8 @@
 
 ## Hướng dẫn chi tiết cho 3 thành viên
 
+**Trạng thái cuối (07/11/2026):** hoàn thành. CI xanh tại commit `7804b97`; báo cáo tại `notes/day2_report.md`, đánh giá tại `notes/day2_eval.md`, review hồi cứu tại `notes/day2_review.md`.
+
 **Dự án:** AI Personalized Recommendation System (MovieLens 100K)
 
 **Mục tiêu Day 2:** Có luồng Content-Based Filtering hoàn chỉnh:
@@ -50,11 +52,11 @@
 
 ### Việc cần dọn trước khi bắt đầu
 
-- [ ] Sync local `main` lên `origin/main` mới nhất.
-- [ ] Đóng PR #5 với ghi chú “superseded by #6”.
-- [ ] Tạo `notes/day1_report.md` ngắn.
-- [ ] Tạo branch `feat/content-based`.
-- [ ] Xác nhận `git status` sạch.
+- [x] Sync local `main` lên `origin/main` mới nhất.
+- [x] Đóng PR #5 với ghi chú “superseded by #6”.
+- [x] Tạo `notes/day1_report.md` ngắn.
+- [x] Tạo branch `feat/content-based`.
+- [x] Xác nhận `git status` sạch.
 
 **Lệnh gợi ý:**
 
@@ -101,19 +103,19 @@ Có `ContentBasedRecommender` đúng contract, tích hợp vào service, có uni
 #### Task 1 — Tạo `src/models/content_based.py`
 
 **Feature matrix:**
-- [ ] Lấy 18 genre từ `movies_df`, bỏ `unknown`:
+- [x] Lấy 18 genre từ `movies_df`, bỏ `unknown`:
   `action`, `adventure`, `animation`, `children`, `comedy`, `crime`,
   `documentary`, `drama`, `fantasy`, `film_noir`, `horror`, `musical`,
   `mystery`, `romance`, `sci_fi`, `thriller`, `war`, `western`.
-- [ ] Tạo `genre_matrix` kích thước `n_movies × 18`.
-- [ ] Chuẩn hóa L2 từng vector phim.
-- [ ] Lưu mapping:
+- [x] Tạo `genre_matrix` kích thước `n_movies × 18`.
+- [x] Chuẩn hóa L2 từng vector phim.
+- [x] Lưu mapping:
   - `movie_ids`
   - `movie_id_to_index`
   - `index_to_movie_id`
   - `similarity` — cosine `n_movies × n_movies`
-- [ ] Phim không có genre: vector zero, không crash.
-- [ ] Không dùng test data.
+- [x] Phim không có genre: vector zero, không crash.
+- [x] Không dùng test data.
 
 **Ghi chú:** similarity matrix 1.682 phim khoảng 11 MB, chấp nhận được.
 
@@ -140,85 +142,85 @@ class ContentBasedRecommender:
 ```
 
 **User profile:**
-- [ ] Chỉ lấy rating của user trong `train_df`.
-- [ ] Trọng số: `max(rating - 3.0, 0.0)`.
-- [ ] Profile = weighted average genre vector.
-- [ ] Chuẩn hóa profile.
-- [ ] Nếu user không có rating / profile zero:
+- [x] Chỉ lấy rating của user trong `train_df`.
+- [x] Trọng số: `max(rating - 3.0, 0.0)`.
+- [x] Profile = weighted average genre vector.
+- [x] Chuẩn hóa profile.
+- [x] Nếu user không có rating / profile zero:
   - fallback Popularity.
   - method `"popularity"`.
   - reason `"Fallback phổ biến (cold-start)"`.
 
 **`recommend`:**
-- [ ] Score = cosine(profile, genre vector).
-- [ ] Chỉ giữ phim có `score > 0`.
-- [ ] `exclude_seen=True`: loại phim user đã rating trong **train**.
-- [ ] Sort `score` giảm dần, tie-break `movie_id` tăng dần.
-- [ ] Trả tối đa `k`.
-- [ ] Item content-based:
+- [x] Score = cosine(profile, genre vector).
+- [x] Chỉ giữ phim có `score > 0`.
+- [x] `exclude_seen=True`: loại phim user đã rating trong **train**.
+- [x] Sort `score` giảm dần, tie-break `movie_id` tăng dần.
+- [x] Trả tối đa `k`.
+- [x] Item content-based:
   - `method="content_based"`.
   - reason `"Khớp thể loại: Action, Sci-Fi"`.
   - Không giao thể loại: `"Nội dung tương tự"`.
-- [ ] Không đủ item / không có tín hiệu: fallback Popularity.
+- [x] Không đủ item / không có tín hiệu: fallback Popularity.
 
 **`similar_items`:**
-- [ ] Lấy similarity vector của phim gốc.
-- [ ] Loại chính nó.
-- [ ] Chỉ giữ `score > 0`.
-- [ ] Sort giảm dần, tie-break `movie_id`.
-- [ ] `method="content_based"`.
-- [ ] reason `"Cùng thể loại: Comedy, Romance"`.
-- [ ] Phim không có genre / không có kết quả: fallback Popularity.
-- [ ] Movie ID không tồn tại: raise `ValueError("Movie ... không tồn tại")`.
+- [x] Lấy similarity vector của phim gốc.
+- [x] Loại chính nó.
+- [x] Chỉ giữ `score > 0`.
+- [x] Sort giảm dần, tie-break `movie_id`.
+- [x] `method="content_based"`.
+- [x] reason `"Cùng thể loại: Comedy, Romance"`.
+- [x] Phim không có genre / không có kết quả: fallback Popularity.
+- [x] Movie ID không tồn tại: raise `ValueError("Movie ... không tồn tại")`.
 
 #### Task 3 — Tích hợp service
 
 Sửa `src/service/recommender_service.py`:
-- [ ] Khởi tạo Popularity trước.
-- [ ] Khởi tạo ContentBased với fallback là Popularity.
-- [ ] Thêm `self.models["content_based"]`.
-- [ ] `recommend(..., method="content_based")` hoạt động.
-- [ ] Method không hỗ trợ:
+- [x] Khởi tạo Popularity trước.
+- [x] Khởi tạo ContentBased với fallback là Popularity.
+- [x] Thêm `self.models["content_based"]`.
+- [x] `recommend(..., method="content_based")` hoạt động.
+- [x] Method không hỗ trợ:
   `ValueError("Method ... sẽ có từ Day 3/4")`.
-- [ ] Thêm `method` optional cho `similar_items`:
+- [x] Thêm `method` optional cho `similar_items`:
   ```python
   def similar_items(
       self, movie_id: int, k: int = 10, method: str = "content_based"
   ) -> list[Recommendation]:
   ```
-- [ ] Nếu content-based chưa sẵn sàng, fallback Popularity.
-- [ ] Không đổi response contract.
-- [ ] Service vẫn không import Streamlit.
+- [x] Nếu content-based chưa sẵn sàng, fallback Popularity.
+- [x] Không đổi response contract.
+- [x] Service vẫn không import Streamlit.
 
 **Lưu ý:** app hiện gọi `service.similar_items(movie_id, k=k)` nên mặc định mới sẽ tự dùng Content-Based.
 
 #### Task 4 — Unit test
 
 Tạo `tests/test_content_based.py` với DataFrame giả:
-- [ ] `similar_items` trả phim cùng genre trước.
-- [ ] `similar_items` loại chính nó và tôn trọng `k`.
-- [ ] `recommend` loại phim đã xem khi `exclude_seen=True`.
-- [ ] User lạ fallback Popularity, không crash.
-- [ ] Phim không genre fallback.
-- [ ] Kết quả deterministic khi score bằng nhau.
-- [ ] Score trong `[0, 1]`.
-- [ ] Method content-based là `"content_based"`.
-- [ ] Method fallback là `"popularity"`.
-- [ ] Không phụ thuộc data thật.
+- [x] `similar_items` trả phim cùng genre trước.
+- [x] `similar_items` loại chính nó và tôn trọng `k`.
+- [x] `recommend` loại phim đã xem khi `exclude_seen=True`.
+- [x] User lạ fallback Popularity, không crash.
+- [x] Phim không genre fallback.
+- [x] Kết quả deterministic khi score bằng nhau.
+- [x] Score trong `[0, 1]`.
+- [x] Method content-based là `"content_based"`.
+- [x] Method fallback là `"popularity"`.
+- [x] Không phụ thuộc data thật.
 
 #### Task 5 — Review & tích hợp
 
-- [ ] Review feature audit của Phong: genre coverage, phim không genre.
-- [ ] Review app của Linh: không import trực tiếp model, cache, error handling.
-- [ ] Chạy:
+- [x] Review feature audit của Phong: genre coverage, phim không genre.
+- [x] Review app của Linh: không import trực tiếp model, cache, error handling.
+- [x] Chạy:
   ```bash
   pytest -q
   ruff check .
   python scripts/smoke_content_based.py
   ```
-- [ ] Kiểm tra `git status`: không có data/model lớn.
-- [ ] Review PR, merge khi CI xanh.
-- [ ] Viết `notes/day2_report.md`.
+- [x] Kiểm tra `git status`: không có data/model lớn.
+- [x] Review PR, merge khi CI xanh.
+- [x] Viết `notes/day2_report.md`.
 
 ### 2.4 Lệnh kiểm tra của Huy
 
@@ -232,16 +234,16 @@ python scripts/smoke_content_based.py
 
 ### 2.5 Tiêu chí hoàn thành
 
-- [ ] `ContentBasedRecommender` đúng contract.
-- [ ] `recommend` trả top-K content-based cho user hợp lệ.
-- [ ] `similar_items` trả phim cùng thể loại, loại chính nó.
-- [ ] User lạ fallback Popularity, không crash.
-- [ ] Phim không genre fallback Popularity.
-- [ ] Service hỗ trợ `popularity` và `content_based`.
-- [ ] Unit test pass, không phụ thuộc data thật.
-- [ ] Review xong PR của Phong và Linh.
-- [ ] PR được merge, CI xanh.
-- [ ] Có báo cáo Day 2.
+- [x] `ContentBasedRecommender` đúng contract.
+- [x] `recommend` trả top-K content-based cho user hợp lệ.
+- [x] `similar_items` trả phim cùng thể loại, loại chính nó.
+- [x] User lạ fallback Popularity, không crash.
+- [x] Phim không genre fallback Popularity.
+- [x] Service hỗ trợ `popularity` và `content_based`.
+- [x] Unit test pass, không phụ thuộc data thật.
+- [x] Review xong PR của Phong và Linh.
+- [x] PR được merge, CI xanh.
+- [x] Có báo cáo Day 2.
 
 ### 2.6 Rủi ro & xử lý
 
@@ -283,24 +285,24 @@ Kiểm tra chất lượng feature thể loại, xây dựng đánh giá định
 
 #### Task 1 — Audit feature thể loại
 
-- [ ] Đọc `movies.parquet`, xác nhận đủ 1.682 phim.
-- [ ] Xác nhận đủ 19 cột genre.
-- [ ] Thống kê số phim theo từng genre.
-- [ ] Đếm số phim không có genre nào (18 cột known đều bằng 0).
-- [ ] Kiểm tra tỷ lệ `unknown`.
-- [ ] Liệt kê top genre và các genre ít phổ biến.
-- [ ] Ghi nhận các phim không có genre để dùng làm case fallback.
-- [ ] Ghi kết quả vào `notes/day2_eval.md`.
+- [x] Đọc `movies.parquet`, xác nhận đủ 1.682 phim.
+- [x] Xác nhận đủ 19 cột genre.
+- [x] Thống kê số phim theo từng genre.
+- [x] Đếm số phim không có genre nào (18 cột known đều bằng 0).
+- [x] Kiểm tra tỷ lệ `unknown`.
+- [x] Liệt kê top genre và các genre ít phổ biến.
+- [x] Ghi nhận các phim không có genre để dùng làm case fallback.
+- [x] Ghi kết quả vào `notes/day2_eval.md`.
 
 #### Task 2 — Chuẩn bị case đánh giá định tính
 
-- [ ] Chọn 3 user: `1`, `196`, `405`.
-- [ ] Chọn 3 phim:
+- [x] Chọn 3 user: `1`, `196`, `405`.
+- [x] Chọn 3 phim:
   - `Toy Story (1)`
   - `Star Wars (50)`
   - `Pulp Fiction (296)`
-- [ ] Xác định thể loại kỳ vọng của từng phim.
-- [ ] Định nghĩa tiêu chí đánh giá:
+- [x] Xác định thể loại kỳ vọng của từng phim.
+- [x] Định nghĩa tiêu chí đánh giá:
   - Top-5 có cùng genre với profile không?
   - Có phim đã xem bị lọt vào không?
   - Similar movies có cùng genre với phim gốc không?
@@ -309,32 +311,32 @@ Kiểm tra chất lượng feature thể loại, xây dựng đánh giá định
 
 #### Task 3 — Viết `scripts/smoke_content_based.py`
 
-- [ ] Load `RecommenderService`.
-- [ ] In top-5 content-based cho user `1`, `196`, `405`.
-- [ ] In similar movies cho 3 phim ở trên.
-- [ ] In method và reason của từng item.
-- [ ] Kiểm tra không có phim đã xem trong top-10 (dùng train).
-- [ ] Kiểm tra user `999999` fallback Popularity.
-- [ ] Kiểm tra phim không genre fallback.
-- [ ] Script không import Streamlit, chỉ dùng service.
-- [ ] Exit code khác 0 nếu có case fail.
+- [x] Load `RecommenderService`.
+- [x] In top-5 content-based cho user `1`, `196`, `405`.
+- [x] In similar movies cho 3 phim ở trên.
+- [x] In method và reason của từng item.
+- [x] Kiểm tra không có phim đã xem trong top-10 (dùng train).
+- [x] Kiểm tra user `999999` fallback Popularity.
+- [x] Kiểm tra phim không genre fallback.
+- [x] Script không import Streamlit, chỉ dùng service.
+- [x] Exit code khác 0 nếu có case fail.
 
 #### Task 4 — Chạy đánh giá và ghi nhận
 
-- [ ] Chạy script sau khi Huy xong service.
-- [ ] Ghi kết quả thực tế vào `notes/day2_eval.md`.
-- [ ] Ghi các case bất thường:
+- [x] Chạy script sau khi Huy xong service.
+- [x] Ghi kết quả thực tế vào `notes/day2_eval.md`.
+- [x] Ghi các case bất thường:
   - Similarity thấp.
   - Gợi ý lệch genre.
   - Fallback ngoài dự kiến.
-- [ ] Chưa tính RMSE/MAE cho Content-Based.
-- [ ] Ranking metrics để Day 3.
+- [x] Chưa tính RMSE/MAE cho Content-Based.
+- [x] Ranking metrics để Day 3.
 
 #### Task 5 — Review chéo
 
-- [ ] Review model của Huy: chỉ dùng train, không leakage.
-- [ ] Review app của Linh: kết quả hiển thị đúng method/reason.
-- [ ] Chạy lại lệnh của Huy và Linh trên máy mình.
+- [x] Review model của Huy: chỉ dùng train, không leakage.
+- [x] Review app của Linh: kết quả hiển thị đúng method/reason.
+- [x] Chạy lại lệnh của Huy và Linh trên máy mình.
 
 ### 3.4 Lệnh kiểm tra của Phong
 
@@ -346,13 +348,13 @@ python -c "import pandas as pd; m=pd.read_parquet('data/processed/movies.parquet
 
 ### 3.5 Tiêu chí hoàn thành
 
-- [ ] Feature audit đầy đủ.
-- [ ] Smoke script chạy được, exit code đúng.
-- [ ] Đã đánh giá 3 user và 3 phim.
-- [ ] Đã kiểm tra user lạ và phim không genre.
-- [ ] Không có phim đã xem trong top-K.
-- [ ] Có `notes/day2_eval.md`.
-- [ ] Review xong model và app.
+- [x] Feature audit đầy đủ.
+- [x] Smoke script chạy được, exit code đúng.
+- [x] Đã đánh giá 3 user và 3 phim.
+- [x] Đã kiểm tra user lạ và phim không genre.
+- [x] Không có phim đã xem trong top-K.
+- [x] Có `notes/day2_eval.md`.
+- [x] Review xong model và app.
 
 ### 3.6 Rủi ro & xử lý
 
@@ -392,74 +394,74 @@ python -c "import pandas as pd; m=pd.read_parquet('data/processed/movies.parquet
 
 #### Task 1 — Review UI hiện tại
 
-- [ ] Đọc `app/pages/2_Recommendations.py`.
-- [ ] Đọc `app/pages/3_Similar_Movies.py`.
-- [ ] Đọc `app/pages/4_Compare_Methods.py`.
-- [ ] Xác nhận app chỉ import `src.service`, không import `src.models`.
-- [ ] Xác nhận cache đang dùng đúng.
+- [x] Đọc `app/pages/2_Recommendations.py`.
+- [x] Đọc `app/pages/3_Similar_Movies.py`.
+- [x] Đọc `app/pages/4_Compare_Methods.py`.
+- [x] Xác nhận app chỉ import `src.service`, không import `src.models`.
+- [x] Xác nhận cache đang dùng đúng.
 
 #### Task 2 — Cập nhật Recommendations page
 
-- [ ] Selectbox phương pháp:
+- [x] Selectbox phương pháp:
   - `Popularity` → `popularity`
   - `Content-Based` → `content_based`
-- [ ] Giữ slider K 5–20.
-- [ ] Giữ checkbox “Loại bỏ phim đã xem”.
-- [ ] Hiển thị method và reason trên card.
-- [ ] Xử lý danh sách rỗng.
-- [ ] Xử lý lỗi service.
+- [x] Giữ slider K 5–20.
+- [x] Giữ checkbox “Loại bỏ phim đã xem”.
+- [x] Hiển thị method và reason trên card.
+- [x] Xử lý danh sách rỗng.
+- [x] Xử lý lỗi service.
 
 #### Task 3 — Cập nhật Similar Movies page
 
-- [ ] Bỏ note “Day 1 dùng fallback popularity”.
-- [ ] Giữ tìm kiếm phim + selectbox.
-- [ ] Dùng `service.similar_items` mặc định content-based.
-- [ ] Hiển thị lý do “Cùng thể loại: ...”.
-- [ ] Xử lý phim không tồn tại / không có kết quả.
-- [ ] Không thêm `list_movies` nếu không cần.
+- [x] Bỏ note “Day 1 dùng fallback popularity”.
+- [x] Giữ tìm kiếm phim + selectbox.
+- [x] Dùng `service.similar_items` mặc định content-based.
+- [x] Hiển thị lý do “Cùng thể loại: ...”.
+- [x] Xử lý phim không tồn tại / không có kết quả.
+- [x] Không thêm `list_movies` nếu không cần.
 
 #### Task 4 — Cập nhật Compare/Home
 
-- [ ] `app/pages/4_Compare_Methods.py`:
+- [x] `app/pages/4_Compare_Methods.py`:
   - Popularity: có.
   - Content-Based: có.
   - Item-CF, SVD, Hybrid: sẽ làm Day 3–4.
-- [ ] `app/Home.py`:
+- [x] `app/Home.py`:
   - Cập nhật mô tả model hiện có.
   - Không cần thêm metric mới.
 
 #### Task 5 — README và CI
 
-- [ ] Cập nhật kiến trúc: Content-Based đã có.
-- [ ] Cập nhật roadmap Day 2.
-- [ ] Thêm mục “Kết quả Day 2”:
+- [x] Cập nhật kiến trúc: Content-Based đã có.
+- [x] Cập nhật roadmap Day 2.
+- [x] Thêm mục “Kết quả Day 2”:
   - phương pháp.
   - ví dụ top-5 cho 1 user.
   - ví dụ similar movies cho 1 phim.
   - hạn chế: genre-only, cold-start, popularity fallback.
-- [ ] Cập nhật lệnh chạy smoke test mới.
-- [ ] Không ghi đè RMSE/MAE của Popularity.
-- [ ] Kiểm tra CI vẫn chạy `ruff check .` và `pytest -q`.
+- [x] Cập nhật lệnh chạy smoke test mới.
+- [x] Không ghi đè RMSE/MAE của Popularity.
+- [x] Kiểm tra CI vẫn chạy `ruff check .` và `pytest -q`.
 
 #### Task 6 — Kiểm tra app
 
-- [ ] Chạy `streamlit run app/Home.py`.
-- [ ] Chọn 3 user, top-10 content-based hiển thị.
-- [ ] Chọn 3 phim, similar movies hiển thị.
-- [ ] User không tồn tại không crash.
-- [ ] `exclude_seen=True` không trả phim đã xem.
-- [ ] App không import trực tiếp model.
-- [ ] Sau cache, phản hồi < 2 giây.
-- [ ] Chạy AppTest cho 5 trang.
+- [x] Chạy `streamlit run app/Home.py`.
+- [x] Chọn 3 user, top-10 content-based hiển thị.
+- [x] Chọn 3 phim, similar movies hiển thị.
+- [x] User không tồn tại không crash.
+- [x] `exclude_seen=True` không trả phim đã xem.
+- [x] App không import trực tiếp model.
+- [x] Sau cache, phản hồi < 2 giây.
+- [x] Chạy AppTest cho 5 trang.
 
 #### Task 7 — PR
 
-- [ ] Branch `feat/content-based`.
-- [ ] PR title: `feat(model): add content-based recommender and similar movies`.
-- [ ] Mô tả What / Why / How tested / Screenshot.
-- [ ] Gắn ví dụ top-5 và similar movies.
-- [ ] Ghi rõ fallback cases.
-- [ ] Nhờ Huy/Phong review.
+- [x] Branch `feat/content-based`.
+- [x] PR title: `feat(model): add content-based recommender and similar movies`.
+- [x] Mô tả What / Why / How tested / Screenshot.
+- [x] Gắn ví dụ top-5 và similar movies.
+- [x] Ghi rõ fallback cases.
+- [x] Nhờ Huy/Phong review.
 
 ### 4.4 Lệnh kiểm tra của Linh
 
@@ -472,14 +474,14 @@ streamlit run app/Home.py
 
 ### 4.5 Tiêu chí hoàn thành
 
-- [ ] Page 2 chọn được Popularity / Content-Based.
-- [ ] Page 3 dùng content-based, hiển thị reason.
-- [ ] Page 4/Home cập nhật trạng thái.
-- [ ] App không import trực tiếp model.
-- [ ] Cache hoạt động.
-- [ ] README cập nhật.
-- [ ] CI xanh.
-- [ ] PR được review + merge.
+- [x] Page 2 chọn được Popularity / Content-Based.
+- [x] Page 3 dùng content-based, hiển thị reason.
+- [x] Page 4/Home cập nhật trạng thái.
+- [x] App không import trực tiếp model.
+- [x] Cache hoạt động.
+- [x] README cập nhật.
+- [x] CI xanh.
+- [x] PR được review + merge.
 
 ### 4.6 Rủi ro & xử lý
 
@@ -512,6 +514,8 @@ streamlit run app/Home.py
 | Linh → Huy | Service API, app hiển thị method/reason | 15:30 |
 | Cả nhóm | Chạy lại lệnh của nhau trên máy mình | 16:00 |
 
+**Ghi nhận review Day 2:** xem `notes/day2_review.md`. Repo hiện chỉ có một tài khoản maintainer nên GitHub không thể có approval chéo; review hồi cứu đã được thực hiện, chạy lại toàn bộ kiểm tra và ghi nhận tại đây.
+
 **Quy tắc review:**
 - Ưu tiên correctness, leakage, khả năng chạy, interface.
 - Không bắt lỗi style nhỏ nếu không ảnh hưởng.
@@ -523,34 +527,34 @@ streamlit run app/Home.py
 ## 6. CHECKLIST CHUNG CUỐI DAY 2
 
 ### Model
-- [ ] `ContentBasedRecommender` đúng contract.
-- [ ] Chỉ dùng train để tạo profile.
-- [ ] Similar items cùng genre, loại chính nó.
-- [ ] Fallback Popularity cho cold-start/không genre.
-- [ ] Không đọc test data.
+- [x] `ContentBasedRecommender` đúng contract.
+- [x] Chỉ dùng train để tạo profile.
+- [x] Similar items cùng genre, loại chính nó.
+- [x] Fallback Popularity cho cold-start/không genre.
+- [x] Không đọc test data.
 
 ### Service
-- [ ] `content_based` đã đăng ký.
-- [ ] `recommend` và `similar_items` hoạt động.
-- [ ] Method không hỗ trợ raise `ValueError` rõ ràng.
-- [ ] App không import trực tiếp model.
+- [x] `content_based` đã đăng ký.
+- [x] `recommend` và `similar_items` hoạt động.
+- [x] Method không hỗ trợ raise `ValueError` rõ ràng.
+- [x] App không import trực tiếp model.
 
 ### App
-- [ ] Page 2 chọn 2 phương pháp.
-- [ ] Page 3 dùng content-based.
-- [ ] Hiển thị method/reason.
-- [ ] User không tồn tại không crash.
-- [ ] `exclude_seen=True` hoạt động.
+- [x] Page 2 chọn 2 phương pháp.
+- [x] Page 3 dùng content-based.
+- [x] Hiển thị method/reason.
+- [x] User không tồn tại không crash.
+- [x] `exclude_seen=True` hoạt động.
 
 ### Test & tài liệu
-- [ ] `pytest -q` pass.
-- [ ] `ruff check .` pass.
-- [ ] CI xanh.
-- [ ] Smoke script chạy.
-- [ ] README cập nhật.
-- [ ] Có `notes/day2_eval.md` và `notes/day2_report.md`.
-- [ ] Không commit data/model/secret.
-- [ ] PR có review.
+- [x] `pytest -q` pass.
+- [x] `ruff check .` pass.
+- [x] CI xanh.
+- [x] Smoke script chạy.
+- [x] README cập nhật.
+- [x] Có `notes/day2_eval.md` và `notes/day2_report.md`.
+- [x] Không commit data/model/secret.
+- [x] PR có review.
 
 ---
 
