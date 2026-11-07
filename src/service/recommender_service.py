@@ -266,3 +266,11 @@ class RecommenderService:
             return {}
         with path.open(encoding="utf-8") as file:
             return json.load(file)
+
+    def get_ranking_metrics(self) -> dict:
+        """Đọc kết quả đánh giá ranking, trả về {} nếu chưa có."""
+        path = self.metrics_dir / "ranking.json"
+        if not path.exists():
+            return {}
+        with path.open(encoding="utf-8") as file:
+            return json.load(file)

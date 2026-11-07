@@ -43,11 +43,19 @@ options = {
     for movie in matches
 }
 selected = st.selectbox("Chọn phim", list(options))
+method = st.selectbox(
+    "Phương pháp",
+    ["content_based", "item_cf"],
+    format_func=lambda value: {
+        "content_based": "Content-Based",
+        "item_cf": "Item-Based CF (Lọc cộng tác)",
+    }[value],
+)
 k = st.slider("Số lượng phim tương tự", min_value=5, max_value=20, value=10)
 
 if st.button("Tìm phim tương tự", type="primary"):
     try:
-        recommendations = service.similar_items(options[selected], k=k)
+        recommendations = service.similar_items(options[selected], k=k, method=method)
     except (ValueError, RuntimeError) as exc:
         st.error(str(exc))
         st.stop()
