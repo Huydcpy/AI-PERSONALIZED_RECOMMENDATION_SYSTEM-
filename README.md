@@ -198,29 +198,44 @@ Genre-only features are coarse and often tie. Content and Popularity scores have
 
 ## Kết quả Day 3
 
-### Ranking Metrics (3 mô hình)
-Kết quả được ghi trong `reports/metrics/ranking.json` (đánh giá trên test set, relevance threshold `rating >= 4.0`, macro-average theo user).
+### Ranking Metrics (3 models)
+
+Train-only fit; test relevance rating >= 4.0, K=5/10/20; macro-average over 456 users, 487 users without relevant items skipped.
 
 | Model | Precision@5 | Precision@10 | Recall@10 | NDCG@10 | Coverage@10 |
-|---|---|---|---|---|---|
-| Popularity | *(xem ranking.json)* | *(xem ranking.json)* | *(xem ranking.json)* | *(xem ranking.json)* | *(xem ranking.json)* |
-| Content-Based | *(xem ranking.json)* | *(xem ranking.json)* | *(xem ranking.json)* | *(xem ranking.json)* | *(xem ranking.json)* |
-| Item-Based CF | *(xem ranking.json)* | *(xem ranking.json)* | *(xem ranking.json)* | *(xem ranking.json)* | *(xem ranking.json)* |
+|---|---:|---:|---:|---:|---:|
+| popularity | 0.163158 | 0.164474 | 0.070910 | 0.174714 | 0.023187 |
+| content_based | 0.058772 | 0.047368 | 0.022264 | 0.055068 | 0.237812 |
+| item_cf | 0.028947 | 0.029167 | 0.018530 | 0.031481 | 0.508323 |
 
-Chạy `python scripts/run_ranking_eval.py` để tạo/cập nhật bảng trên.
+Popularity has the highest NDCG@10; Item-CF has the highest coverage. Full results: `reports/metrics/ranking.json`. No hyperparameters were tuned on test.
 
-### Ví dụ Item-CF
-**Top-5 gợi ý cho User 1 (Item-Based CF, `method="item_cf"`, `k=5`, `exclude_seen=True`):**
-*(Kết quả phụ thuộc vào mô hình đã huấn luyện; chạy ứng dụng/smoke để xem chi tiết.)*
+Item-CF uses adjusted cosine on user-centered train ratings and keeps 50 neighbors per item. Recommendations return clipped predicted ratings in [1,5]; similar movies return cosine scores. Cold-start and missing-signal cases use Popularity fallback with explicit method/reason.
 
-**Similar Movies (Item-Based CF, `similar_items`):**
-- Toy Story (movie_id=1): phim tương tự dựa trên cộng đồng người dùng (Item-CF), reason thường là `"Cùng gu người dùng"`.
-- Star Wars (movie_id=50), Pulp Fiction (movie_id=56): xem qua `python scripts/smoke_item_cf.py`.
 
-### Hạn chế (Day 3)
-- **Thưa dữ liệu (Sparsity):** Ma trận user-item rất thưa (~93.7%), ảnh hưởng đến chất lượng Item-CF với người dùng/phim ít tương tác.
-- **Cold-start problem:** Người dùng mới hoặc phim mới khó có đủ láng giềng để đưa ra gợi ý đáng tin cậy.
-- **Fallback Popularity:** Khi Item-CF không đủ tín hiệu (thiếu láng giềng/phim liên quan), hệ thống fallback về Popularity để đảm bảo luôn có gợi ý.
+### Item-CF user 196
+
+| movie_id | Title | Score | Method |
+|---|---|---:|---|
+| 127 | Godfather, The (1972) | 5.000000 | item_cf |
+| 154 | Monty Python's Life of Brian (1979) | 5.000000 | item_cf |
+| 182 | GoodFellas (1990) | 5.000000 | item_cf |
+| 293 | Donnie Brasco (1997) | 5.000000 | item_cf |
+| 311 | Wings of the Dove, The (1997) | 5.000000 | item_cf |
+
+### Item-CF similar to Toy Story (1)
+
+| movie_id | Title | Score | Method |
+|---|---|---:|---|
+| 174 | Raiders of the Lost Ark (1981) | 0.232298 | item_cf |
+| 50 | Star Wars (1977) | 0.218316 | item_cf |
+| 28 | Apollo 13 (1995) | 0.205302 | item_cf |
+| 318 | Schindler's List (1993) | 0.198516 | item_cf |
+| 181 | Return of the Jedi (1983) | 0.197914 | item_cf |
+
+Sparse data, cold-start cases and predictions clipped at 5 can reduce ranking quality and produce ties. Item-CF precision is below Popularity on this split. Day 1 baseline rating metrics remain unchanged.
+
+Report and all 3-user/3-movie examples: [Day 3 report](notes/day3_report.md). Protocol and results: [Day 3 evaluation](notes/day3_eval.md). Integration review: [Day 3 review](notes/day3_review.md).
 
 ### Smoke test & CI
 ```bash

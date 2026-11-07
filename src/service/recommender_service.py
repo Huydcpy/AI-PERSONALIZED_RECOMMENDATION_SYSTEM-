@@ -84,6 +84,12 @@ class RecommenderService:
         except ImportError:
             pass
 
+        from src.models.item_cf import ItemCFRecommender
+
+        self.models["item_cf"] = ItemCFRecommender(
+            self.train_df, self.movies_df, fallback=popularity
+        )
+
     def list_users(self) -> list[int]:
         """Trả về danh sách user_id có trong dữ liệu."""
         if self.users_df is None:
@@ -228,7 +234,9 @@ class RecommenderService:
                     "thiếu model hoặc dữ liệu train/movies"
                 )
             else:
-                raise ValueError(f"Method {method} sẽ có từ Day 3/4")
+                if method == "item_cf":
+                    raise RuntimeError("ItemCFRecommender chưa sẵn sàng: thiếu dữ liệu train/movies")
+                raise ValueError(f"Method {method} sẽ có từ Day 4")
         return model.recommend(
             user_id=user_id, k=k, exclude_seen=exclude_seen
         )
@@ -255,7 +263,9 @@ class RecommenderService:
                     "thiếu model hoặc dữ liệu train/movies"
                 )
             else:
-                raise ValueError(f"Method {method} sẽ có từ Day 3/4")
+                if method == "item_cf":
+                    raise RuntimeError("ItemCFRecommender chưa sẵn sàng: thiếu dữ liệu train/movies")
+                raise ValueError(f"Method {method} sẽ có từ Day 4")
         self.get_movie(movie_id)
         return model.similar_items(movie_id=movie_id, k=k)
 
@@ -268,7 +278,6 @@ class RecommenderService:
             return json.load(file)
 
     def get_ranking_metrics(self) -> dict:
-        """Đọc kết quả đánh giá ranking, trả về {} nếu chưa có."""
         path = self.metrics_dir / "ranking.json"
         if not path.exists():
             return {}

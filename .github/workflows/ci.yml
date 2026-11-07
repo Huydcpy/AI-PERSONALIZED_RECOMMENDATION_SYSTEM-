@@ -35,6 +35,10 @@ jobs:
           python -m src.data.splits
       - name: Test
         run: pytest -q
+      - name: Ranking evaluation
+        run: python scripts/run_ranking_eval.py
+      - name: Item-CF smoke test
+        run: python scripts/smoke_item_cf.py
       - name: Content-Based smoke test
         run: python scripts/smoke_content_based.py
       - name: Surprise smoke test

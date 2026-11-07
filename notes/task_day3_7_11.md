@@ -2,6 +2,8 @@
 
 ## Hướng dẫn chi tiết cho 3 thành viên
 
+**Cập nhật 07/11/2026:** đã tích hợp phần còn thiếu với giao diện PR #13; kiểm chứng local đạt 67 test, lint và smoke, có kết quả ranking thực tế. Báo cáo: `notes/day3_report.md`; đánh giá: `notes/day3_eval.md`; review tích hợp: `notes/day3_review.md`. CI GitHub, approval độc lập và merge theo trạng thái PR thực tế, không suy ra từ kiểm thử local.
+
 **Dự án:** AI Personalized Recommendation System (MovieLens 100K)
 
 **Mục tiêu Day 3:** có **Item-CF** và **ranking metrics** hoàn chỉnh:
