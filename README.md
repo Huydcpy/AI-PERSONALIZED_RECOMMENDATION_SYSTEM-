@@ -117,17 +117,23 @@ python -m src.data.download
 python -m src.data.preprocess
 python -m src.data.splits
 
-# 2. Huấn luyện baseline và đánh giá
+# 2. Huấn luyện baseline và đánh giá rating
 python scripts/run_baseline.py
 
-# 3. Kiểm tra môi trường Surprise (không phải kết quả chính thức)
+# 3. Đánh giá ranking (Day 3)
+python scripts/run_ranking_eval.py
+
+# 4. Smoke test Item-CF
+python scripts/smoke_item_cf.py
+
+# 5. Kiểm tra môi trường Surprise (không phải kết quả chính thức)
 python scripts/smoke_surprise.py
 
-# 4. Chạy test và lint
+# 6. Chạy test và lint (CI)
 pytest -q
 ruff check .
 
-# 5. Chạy giao diện
+# 7. Chạy giao diện
 streamlit run app/Home.py
 ```
 
@@ -143,9 +149,9 @@ Chi tiết trong `reports/metrics/baseline.json`.
 
 | Ngày | Nội dung |
 |---|---|
-| Day 1 | Data pipeline, popularity baseline, rating metrics, Streamlit app |
+| Day 1 | Data pipeline, popularity baseline, rating metrics (RMSE/MAE), Streamlit app |
 | Day 2 | Đã triển khai Content-Based Filtering, Similar Movies và Compare Methods; kiểm chứng local trong notes/day2_eval.md |
-| Day 3 | Item-CF, ranking metrics (Precision@K, Recall@K, NDCG@K) |
+| Day 3 | Item-CF, ranking metrics (Precision@K, Recall@K, NDCG@K), cập nhật giao diện (Recommendations, Similar Movies, Compare Methods, Evaluation) |
 | Day 4 | SVD, Hybrid, trang so sánh phương pháp |
 | Day 5 | Hoàn thiện đánh giá, báo cáo và demo |
 
@@ -189,5 +195,38 @@ User 1 top-5: 47: Ed Wood (1994); 65: What's Eating Gilbert Grape (1993); 150: S
 Toy Story similar top-5: 422: Aladdin and the King of Thieves (1996); 95: Aladdin (1992); 1219: Goofy Movie, A (1995); 63: Santa Clause, The (1994); 94: Home Alone (1990).
 
 Genre-only features are coarse and often tie. Content and Popularity scores have different scales. No Content-Based RMSE/MAE is claimed; Day 1 baseline metrics remain unchanged. Audit and examples: [Day 2 evaluation](notes/day2_eval.md). Review record: [Day 2 review](notes/day2_review.md). Screenshot: [Home](reports/figures/day2_home.png). CI passed at commit `7804b97`.
+
+## Kết quả Day 3
+
+### Ranking Metrics (3 mô hình)
+Kết quả được ghi trong `reports/metrics/ranking.json` (đánh giá trên test set, relevance threshold `rating >= 4.0`, macro-average theo user).
+
+| Model | Precision@5 | Precision@10 | Recall@10 | NDCG@10 | Coverage@10 |
+|---|---|---|---|---|---|
+| Popularity | *(xem ranking.json)* | *(xem ranking.json)* | *(xem ranking.json)* | *(xem ranking.json)* | *(xem ranking.json)* |
+| Content-Based | *(xem ranking.json)* | *(xem ranking.json)* | *(xem ranking.json)* | *(xem ranking.json)* | *(xem ranking.json)* |
+| Item-Based CF | *(xem ranking.json)* | *(xem ranking.json)* | *(xem ranking.json)* | *(xem ranking.json)* | *(xem ranking.json)* |
+
+Chạy `python scripts/run_ranking_eval.py` để tạo/cập nhật bảng trên.
+
+### Ví dụ Item-CF
+**Top-5 gợi ý cho User 1 (Item-Based CF, `method="item_cf"`, `k=5`, `exclude_seen=True`):**
+*(Kết quả phụ thuộc vào mô hình đã huấn luyện; chạy ứng dụng/smoke để xem chi tiết.)*
+
+**Similar Movies (Item-Based CF, `similar_items`):**
+- Toy Story (movie_id=1): phim tương tự dựa trên cộng đồng người dùng (Item-CF), reason thường là `"Cùng gu người dùng"`.
+- Star Wars (movie_id=50), Pulp Fiction (movie_id=56): xem qua `python scripts/smoke_item_cf.py`.
+
+### Hạn chế (Day 3)
+- **Thưa dữ liệu (Sparsity):** Ma trận user-item rất thưa (~93.7%), ảnh hưởng đến chất lượng Item-CF với người dùng/phim ít tương tác.
+- **Cold-start problem:** Người dùng mới hoặc phim mới khó có đủ láng giềng để đưa ra gợi ý đáng tin cậy.
+- **Fallback Popularity:** Khi Item-CF không đủ tín hiệu (thiếu láng giềng/phim liên quan), hệ thống fallback về Popularity để đảm bảo luôn có gợi ý.
+
+### Smoke test & CI
+```bash
+python scripts/smoke_item_cf.py
+pytest -q
+ruff check .
+```
 
 On Windows, building scikit-surprise 1.1.4 requires Microsoft C++ Build Tools. MSVC and Windows SDK are now installed locally; scikit-surprise 1.1.4 built successfully and all 41 tests pass after integrating the remote feature branch. The Surprise smoke script passes with RMSE 0.9540. If Windows console encoding fails on Vietnamese output, set `$env:PYTHONIOENCODING = "utf-8"` before running the script in PowerShell.
