@@ -28,9 +28,13 @@ if not users:
 user_id = st.selectbox("Chọn User ID", users)
 method = st.selectbox(
     "Phương pháp",
-    ["popularity", "content_based"],
-    format_func=lambda value: {"popularity": "Popularity", "content_based": "Content-Based"}[value],
-    help="Content-Based dùng thể loại; Popularity dùng điểm phổ biến.",
+    ["popularity", "content_based", "item_cf"],
+    format_func=lambda value: {
+        "popularity": "Popularity",
+        "content_based": "Content-Based",
+        "item_cf": "Item-Based CF (Lọc cộng tác)",
+    }[value],
+    help="Content-Based dùng thể loại; Popularity dùng điểm phổ biến; Item-Based CF dựa trên sự tương đồng giữa các phim.",
 )
 k = st.slider("Số lượng gợi ý", min_value=5, max_value=20, value=10)
 exclude_seen = st.checkbox("Loại bỏ phim đã xem", value=True)
