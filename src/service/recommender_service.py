@@ -90,6 +90,34 @@ class RecommenderService:
             self.train_df, self.movies_df, fallback=popularity
         )
 
+        svd = None
+        try:
+            from src.models.svd import SVDRecommender
+
+            svd = SVDRecommender(
+                self.train_df, self.movies_df, fallback=popularity
+            )
+            self.models["svd"] = svd
+        except ImportError:
+            pass
+
+        if svd is not None:
+            components = {
+                key: self.models.get(key)
+                for key in ("svd", "item_cf", "content_based")
+            }
+            if all(components.values()):
+                try:
+                    from src.models.hybrid import HybridRecommender
+
+                    self.models["hybrid"] = HybridRecommender(
+                        components,
+                        self.train_df,
+                        fallback=popularity,
+                    )
+                except ImportError:
+                    pass
+
     def list_users(self) -> list[int]:
         """Trả về danh sách user_id có trong dữ liệu."""
         if self.users_df is None:
@@ -211,6 +239,40 @@ class RecommenderService:
             for row in rows.to_dict("records")
         ]
 
+    def _resolve_model(self, method: str):
+        model = self.models.get(method)
+        if model is not None:
+            return model
+        if method == "content_based":
+            model = self.models.get("popularity")
+            if model is None:
+                raise RuntimeError(
+                    "ContentBasedRecommender chưa sẵn sàng: "
+                    "thiếu model hoặc dữ liệu train/movies"
+                )
+            return model
+        if method == "popularity":
+            raise RuntimeError(
+                "PopularityRecommender chưa sẵn sàng: "
+                "thiếu model hoặc dữ liệu train/movies"
+            )
+        if method == "item_cf":
+            raise RuntimeError(
+                "ItemCFRecommender chưa sẵn sàng: "
+                "thiếu dữ liệu train/movies"
+            )
+        if method == "svd":
+            raise RuntimeError(
+                "SVDRecommender chưa sẵn sàng: "
+                "thiếu model hoặc dữ liệu train/movies"
+            )
+        if method == "hybrid":
+            raise RuntimeError(
+                "HybridRecommender chưa sẵn sàng: "
+                "thiếu model hoặc dữ liệu train/movies"
+            )
+        raise ValueError(f"Method {method} không được hỗ trợ")
+
     def recommend(
         self,
         user_id: int,
@@ -219,24 +281,7 @@ class RecommenderService:
         exclude_seen: bool = True,
     ) -> list[Recommendation]:
         """Gợi ý top-k phim cho người dùng bằng phương pháp đã chọn."""
-        model = self.models.get(method)
-        if model is None:
-            if method == "content_based":
-                model = self.models.get("popularity")
-                if model is None:
-                    raise RuntimeError(
-                        "ContentBasedRecommender chưa sẵn sàng: "
-                        "thiếu model hoặc dữ liệu train/movies"
-                    )
-            elif method == "popularity":
-                raise RuntimeError(
-                    "PopularityRecommender chưa sẵn sàng: "
-                    "thiếu model hoặc dữ liệu train/movies"
-                )
-            else:
-                if method == "item_cf":
-                    raise RuntimeError("ItemCFRecommender chưa sẵn sàng: thiếu dữ liệu train/movies")
-                raise ValueError(f"Method {method} sẽ có từ Day 4")
+        model = self._resolve_model(method)
         return model.recommend(
             user_id=user_id, k=k, exclude_seen=exclude_seen
         )
@@ -248,24 +293,7 @@ class RecommenderService:
         method: str = "content_based",
     ) -> list[Recommendation]:
         """Gợi ý các phim tương tự với một bộ phim."""
-        model = self.models.get(method)
-        if model is None:
-            if method == "content_based":
-                model = self.models.get("popularity")
-                if model is None:
-                    raise RuntimeError(
-                        "ContentBasedRecommender chưa sẵn sàng: "
-                        "thiếu model hoặc dữ liệu train/movies"
-                    )
-            elif method == "popularity":
-                raise RuntimeError(
-                    "PopularityRecommender chưa sẵn sàng: "
-                    "thiếu model hoặc dữ liệu train/movies"
-                )
-            else:
-                if method == "item_cf":
-                    raise RuntimeError("ItemCFRecommender chưa sẵn sàng: thiếu dữ liệu train/movies")
-                raise ValueError(f"Method {method} sẽ có từ Day 4")
+        model = self._resolve_model(method)
         self.get_movie(movie_id)
         return model.similar_items(movie_id=movie_id, k=k)
 
@@ -279,6 +307,13 @@ class RecommenderService:
 
     def get_ranking_metrics(self) -> dict:
         path = self.metrics_dir / "ranking.json"
+        if not path.exists():
+            return {}
+        with path.open(encoding="utf-8") as file:
+            return json.load(file)
+
+    def get_svd_metrics(self) -> dict:
+        path = self.metrics_dir / "svd.json"
         if not path.exists():
             return {}
         with path.open(encoding="utf-8") as file:
