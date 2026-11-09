@@ -185,6 +185,7 @@ def test_exclude_seen_and_unknown_user():
     cold = build_hybrid(models=models, fallback=fallback)
     results = cold.recommend(999, k=3)
     assert all(item.method == "popularity" for item in results)
+    assert all(item.reason == "Fallback phổ biến (cold-start)" for item in results)
     assert fallback.recommend_calls == [(999, 3, True)]
     assert all(not model.recommend_calls for model in models.values())
 

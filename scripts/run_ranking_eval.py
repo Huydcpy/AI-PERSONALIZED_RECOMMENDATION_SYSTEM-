@@ -21,6 +21,8 @@ def load_data(data_dir):
         if not path.is_file():
             raise FileNotFoundError(f"Missing {path}. Run the data pipeline first.")
         tables[name] = pd.read_parquet(path)
+        if tables[name].empty:
+            raise ValueError(f"{name} must be nonempty")
     train, test, movies = (tables[name] for name in ("train", "test", "movies"))
     from src.data.preprocess import validate_ratings
 

@@ -104,8 +104,11 @@ class HybridRecommender:
             return []
         user_id = int(user_id)
         if user_id not in self.known_users:
-            return self.fallback.recommend(
-                user_id, k=k, exclude_seen=exclude_seen
+            return self._fill(
+                [],
+                self.fallback.recommend(user_id, k=k, exclude_seen=exclude_seen),
+                k,
+                "Fallback phổ biến (cold-start)",
             )
         pool = max(50, k * 3)
         excluded = self.seen.get(user_id, set()) if exclude_seen else set()
