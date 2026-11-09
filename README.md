@@ -117,23 +117,23 @@ python -m src.data.download
 python -m src.data.preprocess
 python -m src.data.splits
 
-# 2. Huấn luyện baseline và đánh giá rating
+# 2. Đánh giá rating prediction
 python scripts/run_baseline.py
+python scripts/run_svd_eval.py
 
-# 3. Đánh giá ranking (Day 3)
+# 3. Đánh giá ranking
 python scripts/run_ranking_eval.py
 
-# 4. Smoke test Item-CF
+# 4. Smoke test
 python scripts/smoke_item_cf.py
-
-# 5. Kiểm tra môi trường Surprise (không phải kết quả chính thức)
+python scripts/smoke_svd_hybrid.py
 python scripts/smoke_surprise.py
 
-# 6. Chạy test và lint (CI)
+# 5. Chạy test và lint (CI)
 pytest -q
 ruff check .
 
-# 7. Chạy giao diện
+# 6. Chạy giao diện
 streamlit run app/Home.py
 ```
 
@@ -147,13 +147,13 @@ Chi tiết trong `reports/metrics/baseline.json`.
 
 ## Roadmap
 
-| Ngày | Nội dung |
-|---|---|
-| Day 1 | Data pipeline, popularity baseline, rating metrics (RMSE/MAE), Streamlit app |
-| Day 2 | Đã triển khai Content-Based Filtering, Similar Movies và Compare Methods; kiểm chứng local trong notes/day2_eval.md |
-| Day 3 | Item-CF, ranking metrics (Precision@K, Recall@K, NDCG@K), cập nhật giao diện (Recommendations, Similar Movies, Compare Methods, Evaluation) |
-| Day 4 | SVD, Hybrid, trang so sánh phương pháp |
-| Day 5 | Hoàn thiện đánh giá, báo cáo và demo |
+| Ngày | Nội dung | Trạng thái |
+|---|---|---|
+| Day 1 | Data pipeline, popularity baseline, rating metrics (RMSE/MAE), Streamlit app | Hoàn thành |
+| Day 2 | Content-Based Filtering, Similar Movies và Compare Methods; kiểm chứng local trong notes/day2_eval.md | Hoàn thành |
+| Day 3 | Item-CF, ranking metrics (Precision@K, Recall@K, NDCG@K), cập nhật giao diện (Recommendations, Similar Movies, Compare Methods, Evaluation) | Hoàn thành |
+| Day 4 | SVD & Hybrid, mở rộng Compare Methods/Evaluation/Home/Service cho 5 phương pháp | Hoàn thành |
+| Day 5 | Đánh giá, báo cáo và demo | Kế hoạch |
 
 ## Hạn chế
 
@@ -237,9 +237,49 @@ Sparse data, cold-start cases and predictions clipped at 5 can reduce ranking qu
 
 Report and all 3-user/3-movie examples: [Day 3 report](notes/day3_report.md). Protocol and results: [Day 3 evaluation](notes/day3_eval.md). Integration review: [Day 3 review](notes/day3_review.md).
 
+## Kết quả Day 4
+
+### Rating Prediction (Popularity vs SVD)
+
+| Model | RMSE | MAE | Ghi chú |
+|---|---:|---:|---|
+| Popularity (Bayesian average) | 1.06698 | 0.86310 | Giữ nguyên kết quả Day 1 (`reports/metrics/baseline.json`) |
+| SVD | (chưa có) | (chưa có) | Chạy `python scripts/run_svd_eval.py` để tạo `reports/metrics/svd.json` |
+
+### Ranking Metrics (5 model)
+
+Dữ liệu 3 model đầu lấy từ `reports/metrics/ranking.json` (test relevance rating >= 4.0; macro-average over 456 users, 487 users skipped; K=5/10/20). SVD/Hybrid sẽ xuất hiện sau khi cập nhật và chạy `python scripts/run_ranking_eval.py`.
+
+| Model | Precision@5 | Precision@10 | Recall@10 | NDCG@10 | Coverage@10 |
+|---|---:|---:|---:|---:|---:|
+| Popularity | 0.163158 | 0.164474 | 0.070910 | 0.174714 | 0.023187 |
+| Content-Based | 0.058772 | 0.047368 | 0.022264 | 0.055068 | 0.237812 |
+| Item-CF | 0.028947 | 0.029167 | 0.018530 | 0.031481 | 0.508323 |
+| SVD | (chưa có) | (chưa có) | (chưa có) | (chưa có) | (chưa có) |
+| Hybrid | (chưa có) | (chưa có) | (chưa có) | (chưa có) | (chưa có) |
+
+### Ví dụ Top-5 gợi ý và Similar Movies (SVD, Hybrid)
+
+Chạy `python scripts/smoke_svd_hybrid.py` trong môi trường dự án (đã cài dependencies, có `data/processed`) để lấy ví dụ thực tế cho user 196 (Top-5 gợi ý, `k=5`, `exclude_seen=True`) và phim Toy Story / movie 1 (Top-5 Similar Movies). Giao diện Streamlit (Recommendations, Similar Movies, Compare Methods) hiển thị `method`, `score`, `reason` thực tế từ service.
+
+| Phương pháp | Ngữ cảnh | Ví dụ |
+|---|---|---|
+| SVD | Top-5 gợi ý (user 196) | Chạy `scripts/smoke_svd_hybrid.py` |
+| SVD | Top-5 tương tự (movie 1, Toy Story) | Chạy `scripts/smoke_svd_hybrid.py` |
+| Hybrid | Top-5 gợi ý (user 196) | Chạy `scripts/smoke_svd_hybrid.py` |
+| Hybrid | Top-5 tương tự (movie 1, Toy Story) | Chạy `scripts/smoke_svd_hybrid.py` |
+
+### Hạn chế (Day 4)
+
+- **SVD** cần đủ dữ liệu rating để latent factors ổn định; người dùng/phim ít tín hiệu có thể cho dự đoán kém tin cậy.
+- **Hybrid** phụ thuộc chất lượng và khả năng sẵn sàng của các component (SVD, Item-CF, Content-Based).
+- **Cold-start** (user/phim mới hoặc thiếu tín hiệu) fallback về Popularity; `method`/`reason` hiển thị phản ánh thực tế từ service.
+- **Thang đo score khác nhau** giữa các phương pháp (Popularity: count/rating; Content-Based: cosine [0,1]; Item-CF/SVD: rating [1,5]; Hybrid: blended score [0,1]) nên không so sánh trực tiếp điểm số.
+
 ### Smoke test & CI
 ```bash
 python scripts/smoke_item_cf.py
+python scripts/smoke_svd_hybrid.py
 pytest -q
 ruff check .
 ```

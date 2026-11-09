@@ -10,33 +10,63 @@ if str(ROOT) not in sys.path:
 
 st.set_page_config(page_title="Đánh giá mô hình", layout="wide")
 
-from app.components.service import get_metrics, get_service
+from app.components.service import get_metrics, get_service, get_svd_metrics
 
 st.title("Đánh giá mô hình")
 
+st.subheader("Rating Prediction")
 try:
-    metrics = get_metrics()
+    baseline = get_metrics()
 except (OSError, ValueError, RuntimeError) as exc:
     st.error(f"Không thể đọc baseline metrics: {exc}")
-    metrics = {}
+    baseline = {}
 
-st.subheader("Baseline (Rating Prediction)")
-if not metrics:
+try:
+    svd = get_svd_metrics()
+except (OSError, ValueError, RuntimeError) as exc:
+    st.error(f"Không thể đọc SVD metrics: {exc}")
+    svd = {}
+
+rating_rows = []
+if baseline:
+    rating_rows.append(
+        {
+            "Model": "Popularity",
+            "RMSE": baseline.get("rmse"),
+            "MAE": baseline.get("mae"),
+            "Ghi chú": baseline.get("note", ""),
+        }
+    )
+if svd:
+    rating_rows.append(
+        {
+            "Model": "SVD",
+            "RMSE": svd.get("rmse"),
+            "MAE": svd.get("mae"),
+            "Ghi chú": svd.get("note", ""),
+        }
+    )
+
+if rating_rows:
+    df = pd.DataFrame(rating_rows)
+    for col in ("RMSE", "MAE"):
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+    st.dataframe(df, use_container_width=True, hide_index=True)
+elif not baseline:
     st.warning(
         "Chưa có reports/metrics/baseline.json. "
         "Hãy chạy python scripts/run_baseline.py."
     )
-else:
-    col1, col2 = st.columns(2)
-    rmse = metrics.get("rmse")
-    mae = metrics.get("mae")
-    col1.metric("RMSE", f"{float(rmse):.4f}" if rmse is not None else "N/A")
-    col2.metric("MAE", f"{float(mae):.4f}" if mae is not None else "N/A")
-    st.json(metrics)
+
+if not svd:
+    st.warning(
+        "Chưa có reports/metrics/svd.json. Hãy chạy python scripts/run_svd_eval.py."
+    )
 
 st.divider()
 
-st.subheader("Ranking Evaluation (Top-K Recommendation)")
+st.subheader("Ranking Evaluation")
 try:
     service = get_service()
     ranking_metrics = service.get_ranking_metrics()
@@ -59,18 +89,20 @@ else:
         st.caption(f"Config: {config}")
 
     models_data = ranking_metrics.get("models", {}) or {}
-    model_order = ["popularity", "content_based", "item_cf"]
+    model_order = ["popularity", "content_based", "item_cf", "svd", "hybrid"]
     model_names = {
         "popularity": "Popularity",
         "content_based": "Content-Based",
         "item_cf": "Item-CF",
+        "svd": "SVD",
+        "hybrid": "Hybrid",
     }
 
     rows = []
     for model_key in model_order:
-        if model_key not in models_data:
+        m = models_data.get(model_key)
+        if not m:
             continue
-        m = models_data[model_key] or {}
         rows.append(
             {
                 "Model": model_names.get(model_key, model_key),
@@ -88,5 +120,6 @@ else:
     else:
         st.info("Không có dữ liệu so sánh cho các model.")
 
-    st.caption("Ranking metrics dùng test set và threshold relevance >= 4.0; các thang đo score giữa model không trực tiếp so sánh được.")
-
+    st.caption(
+        "5 phương pháp; test set; relevance >= 4.0; không so sánh trực tiếp score"
+    )
