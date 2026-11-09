@@ -19,10 +19,11 @@ st.markdown(
 st.subheader("Chức năng")
 st.markdown(
     "- Pipeline dữ liệu: download, preprocess, split\n"
-    "- Baseline: Popularity với Bayesian average\n"
-    "- Content-Based: gợi ý cá nhân hóa và phim tương tự theo thể loại\n"
-    "- Item-Based CF: mô hình lọc cộng tác dựa trên sự tương đồng giữa các phim\n"
-    "- Đánh giá: RMSE, MAE (rating prediction) và Ranking Evaluation metrics (Precision@K, Recall@K, NDCG@K, Coverage@K)\n"
+    "- 5 phương pháp gợi ý: Popularity (Bayesian average), Content-Based "
+    "(thể loại), Item-Based CF (tương đồng item), SVD (latent factors), "
+    "Hybrid (SVD + Item-CF + Content-Based)\n"
+    "- 2 bảng đánh giá: Rating metrics (RMSE, MAE) và Ranking metrics "
+    "(Precision@K, Recall@K, NDCG@K, Coverage@K)\n"
     "- Giao diện: nhiều trang Streamlit dùng chung service layer"
 )
 
@@ -58,6 +59,6 @@ else:
     )
 
 st.sidebar.info(
-    "Chọn trang trong sidebar để xem hồ sơ, gợi ý phim, phim tương tự "
-    "và kết quả đánh giá."
+    "Chọn trang trong sidebar để xem hồ sơ, gợi ý phim, phim tương tự, "
+    "so sánh phương pháp và kết quả đánh giá."
 )

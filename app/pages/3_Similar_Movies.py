@@ -13,8 +13,9 @@ from app.components.movie_card import render_movie_card
 from app.components.service import get_service
 
 st.title("Phim tương tự")
-st.info(
-    "Tìm phim tương tự theo thể loại. Phim không có tín hiệu dùng Popularity."
+st.caption(
+    "Content-Based theo thể loại; Item-CF/SVD theo latent/co-occurrence; "
+    "Hybrid kết hợp; phim thiếu tín hiệu dùng Popularity."
 )
 
 try:
@@ -45,10 +46,12 @@ options = {
 selected = st.selectbox("Chọn phim", list(options))
 method = st.selectbox(
     "Phương pháp",
-    ["content_based", "item_cf"],
+    ["content_based", "item_cf", "svd", "hybrid"],
     format_func=lambda value: {
         "content_based": "Content-Based",
         "item_cf": "Item-Based CF (Lọc cộng tác)",
+        "svd": "SVD",
+        "hybrid": "Hybrid",
     }[value],
 )
 k = st.slider("Số lượng phim tương tự", min_value=5, max_value=20, value=10)

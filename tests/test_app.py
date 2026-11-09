@@ -52,8 +52,8 @@ def test_item_cf_interactions_and_ranking_page():
         assert any("item_cf" in item.value for item in app.caption)
     app = AppTest.from_file(str(Path("app/pages/4_Compare_Methods.py").resolve()), default_timeout=30).run()
     assert not app.exception and not app.warning
-    assert len(app.metric) == 30
+    assert len(app.metric) == 50
     app = AppTest.from_file(str(Path("app/pages/5_Evaluation.py").resolve()), default_timeout=30).run()
     assert not app.exception and not app.error
     if Path("reports/metrics/ranking.json").exists():
-        assert len(app.dataframe) == 1
+        assert len(app.dataframe) == 2
