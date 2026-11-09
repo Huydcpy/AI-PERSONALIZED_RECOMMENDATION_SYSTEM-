@@ -69,7 +69,7 @@ def test_service_train_only_and_routing(inputs, tmp_path):
     assert service.get_user_profile(1)["avg_rating"] == 3
     assert service.recommend(1, method="content_based", k=1)[0].movie_id == 2
     assert service.similar_items(1, k=1)[0].movie_id == 2
-    with pytest.raises(ValueError, match="Day 4"):
+    with pytest.raises(ValueError, match="không được hỗ trợ"):
         service.similar_items(1, method="invalid")
-    with pytest.raises(ValueError, match="Day 4"):
+    with pytest.raises(ValueError, match="không được hỗ trợ"):
         service.recommend(1, method="invalid")

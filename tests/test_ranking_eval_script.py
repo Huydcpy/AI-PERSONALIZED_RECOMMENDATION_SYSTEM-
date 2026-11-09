@@ -112,14 +112,27 @@ def test_successful_cli_schema_and_train_only_fit(tmp_path, tables, monkeypatch)
         fitted.append(fallback)
         return FixedModel([2, 4])
 
+    def hybrid_factory(components, fit_train, fallback=None):
+        assert set(components) == {"svd", "item_cf", "content_based"}
+        assert fit_train is train
+        fitted.append(fallback)
+        return FixedModel([2, 4])
+
+    factories = {
+        "popularity": factory,
+        "content_based": factory,
+        "item_cf": factory,
+        "svd": factory,
+        "hybrid": hybrid_factory,
+    }
     monkeypatch.setattr(evaluation, "load_data", lambda _: tables)
     monkeypatch.setattr(evaluation, "load_dependencies",
-                        lambda: ((factory, factory, factory), reference_metrics()))
+                        lambda: (factories, reference_metrics()))
     assert evaluation.main(["--metrics-dir", str(tmp_path)]) == 0
     report = json.loads((tmp_path / "ranking.json").read_text(encoding="utf-8"))
     assert list(report["models"]) == list(evaluation.METHODS)
     assert fitted[0] is None
-    assert fitted[1] is fitted[2]
+    assert fitted[1] is fitted[2] is fitted[3] is fitted[4]
     for values in report["models"].values():
         assert len(values) == 10
         assert all(0 <= value <= 1 for value in values.values())

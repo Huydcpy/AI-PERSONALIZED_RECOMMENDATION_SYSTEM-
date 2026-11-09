@@ -11,7 +11,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 K_VALUES = (5, 10, 20)
-METHODS = ("popularity", "content_based", "item_cf")
+METHODS = ("popularity", "content_based", "item_cf", "svd", "hybrid")
 
 
 def load_data(data_dir):
@@ -47,15 +47,23 @@ def load_dependencies():
             recall_at_k,
         )
         from src.models.content_based import ContentBasedRecommender
+        from src.models.hybrid import HybridRecommender
         from src.models.item_cf import ItemCFRecommender
         from src.models.popularity import PopularityRecommender
+        from src.models.svd import SVDRecommender
     except ImportError as exc:
         raise RuntimeError(
-            "Day 3 dependencies are unavailable. Integrate Huy's "
-            "src/evaluation/ranking_metrics.py and src/models/item_cf.py first."
+            "Day 4 dependencies are unavailable. Integrate Huy's "
+            "SVD/Hybrid models and service first."
         ) from exc
     return (
-        (PopularityRecommender, ContentBasedRecommender, ItemCFRecommender),
+        {
+            "popularity": PopularityRecommender,
+            "content_based": ContentBasedRecommender,
+            "item_cf": ItemCFRecommender,
+            "svd": SVDRecommender,
+            "hybrid": HybridRecommender,
+        },
         {"precision": precision_at_k, "recall": recall_at_k, "ndcg": ndcg_at_k},
     )
 
@@ -107,12 +115,26 @@ def main(argv=None):
     try:
         train, test, movies = load_data(args.data_dir)
         factories, metrics = load_dependencies()
-        popularity = factories[0](train, movies)
+        popularity = factories["popularity"](train, movies)
         models = {
             "popularity": popularity,
-            "content_based": factories[1](train, movies, fallback=popularity),
-            "item_cf": factories[2](train, movies, fallback=popularity),
+            "content_based": factories["content_based"](
+                train, movies, fallback=popularity
+            ),
+            "item_cf": factories["item_cf"](
+                train, movies, fallback=popularity
+            ),
+            "svd": factories["svd"](train, movies, fallback=popularity),
         }
+        models["hybrid"] = factories["hybrid"](
+            {
+                "svd": models["svd"],
+                "item_cf": models["item_cf"],
+                "content_based": models["content_based"],
+            },
+            train,
+            fallback=popularity,
+        )
         report = evaluate(models, train, test, movies, metrics)
         output = Path(args.metrics_dir) / "ranking.json"
         output.parent.mkdir(parents=True, exist_ok=True)
