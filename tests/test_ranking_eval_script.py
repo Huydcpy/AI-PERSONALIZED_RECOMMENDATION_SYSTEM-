@@ -102,6 +102,16 @@ def test_overlap_rejected(tmp_path, tables):
         evaluation.load_data(tmp_path)
 
 
+@pytest.mark.parametrize("empty_name", ["train", "test", "movies"])
+def test_empty_input_rejected(tmp_path, tables, empty_name):
+    for name, table in zip(("train", "test", "movies"), tables):
+        if name == empty_name:
+            table = table.iloc[:0]
+        table.to_parquet(tmp_path / f"{name}.parquet", index=False)
+    with pytest.raises(ValueError, match="nonempty"):
+        evaluation.load_data(tmp_path)
+
+
 def test_successful_cli_schema_and_train_only_fit(tmp_path, tables, monkeypatch):
     train, _test, movies = tables
     fitted = []

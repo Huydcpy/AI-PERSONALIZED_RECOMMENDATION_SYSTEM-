@@ -468,33 +468,33 @@ Gửi nhóm 5 dòng:
 
 #### Task 1 — Cập nhật `docs/evaluation_protocol.md`
 
-- [ ] Ghi rõ Day 4 đánh giá 5 phương pháp: Popularity, Content-Based, Item-CF, SVD, Hybrid.
-- [ ] Ghi rõ SVD có rating metrics RMSE/MAE; các model còn lại không claim rating metrics nếu không có `predict_rating`.
-- [ ] Ghi hyperparameter SVD đã chốt trước đánh giá:
+- [x] Ghi rõ Day 4 đánh giá 5 phương pháp: Popularity, Content-Based, Item-CF, SVD, Hybrid.
+- [x] Ghi rõ SVD có rating metrics RMSE/MAE; các model còn lại không claim rating metrics nếu không có `predict_rating`.
+- [x] Ghi hyperparameter SVD đã chốt trước đánh giá:
   `n_factors=100`, `n_epochs=20`, `lr_all=0.005`, `reg_all=0.02`, `random_state=42`.
-- [ ] Ghi quy tắc Hybrid:
+- [x] Ghi quy tắc Hybrid:
   - Min-max normalize score từng component.
   - Trọng số recommend `svd=0.5`, `item_cf=0.3`, `content_based=0.2`.
   - Trọng số similar `item_cf=0.4`, `svd=0.3`, `content_based=0.3`.
   - Chỉ blend item native; fallback Popularity sau blend.
-- [ ] Ghi rõ score Hybrid `[0, 1]` không so sánh trực tiếp với rating score.
-- [ ] Giữ nguyên relevance threshold `4.0`, K `5/10/20`, K chính `10`, macro-average, coverage denominator.
-- [ ] Ghi rõ test chỉ dùng một lần để đánh giá; không chọn model/hyperparameter/trọng số từ test.
-- [ ] Bỏ câu “chưa đánh giá SVD/Hybrid ở Day 3”; thay bằng phạm vi Day 4.
-- [ ] Ghi rõ chưa tune SVD/Hybrid; kết quả xấu hơn baseline vẫn phải báo cáo.
+- [x] Ghi rõ score Hybrid `[0, 1]` không so sánh trực tiếp với rating score.
+- [x] Giữ nguyên relevance threshold `4.0`, K `5/10/20`, K chính `10`, macro-average, coverage denominator.
+- [x] Ghi rõ test chỉ dùng một lần để đánh giá; không chọn model/hyperparameter/trọng số từ test.
+- [x] Bỏ câu “chưa đánh giá SVD/Hybrid ở Day 3”; thay bằng phạm vi Day 4.
+- [x] Ghi rõ chưa tune SVD/Hybrid; kết quả xấu hơn baseline vẫn phải báo cáo.
 
 #### Task 2 — Viết `scripts/run_svd_eval.py`
 
-- [ ] Load `train`, `test`, `movies`.
-- [ ] Validate:
+- [x] Load `train`, `test`, `movies`.
+- [x] Validate:
   - Đủ file, không rỗng.
   - Train/test không overlap theo cặp `(user_id, movie_id)`.
   - Movie trong train/test thuộc catalog.
-- [ ] Khởi tạo `SVDRecommender(train, movies)` với hyperparameter mặc định.
-- [ ] Với mỗi dòng test: `y_pred = model.predict_rating(user_id, movie_id)`.
-- [ ] Kiểm tra prediction hữu hạn và trong `[1, 5]`; nếu sai, exit khác 0.
-- [ ] Tính RMSE/MAE bằng `src.evaluation.rating_metrics`.
-- [ ] Ghi `reports/metrics/svd.json` theo schema:
+- [x] Khởi tạo `SVDRecommender(train, movies)` với hyperparameter mặc định.
+- [x] Với mỗi dòng test: `y_pred = model.predict_rating(user_id, movie_id)`.
+- [x] Kiểm tra prediction hữu hạn và trong `[1, 5]`; nếu sai, exit khác 0.
+- [x] Tính RMSE/MAE bằng `src.evaluation.rating_metrics`.
+- [x] Ghi `reports/metrics/svd.json` theo schema:
   ```json
   {
     "model": "svd",
@@ -512,11 +512,11 @@ Gửi nhóm 5 dòng:
   }
   ```
   Số `rmse`/`mae` phải là kết quả thật, không để placeholder.
-- [ ] Ghi qua file tạm rồi replace; lỗi không ghi đè kết quả cũ.
-- [ ] In JSON tóm tắt ra console.
-- [ ] Sanity check RMSE trong `[0.5, 1.5]`; ngoài khoảng thì cảnh báo rõ, không che giấu.
-- [ ] Không đọc test khi fit; chỉ dùng test để tính metric một lần.
-- [ ] Script không import Streamlit, không import app.
+- [x] Ghi qua file tạm rồi replace; lỗi không ghi đè kết quả cũ.
+- [x] In JSON tóm tắt ra console.
+- [x] Sanity check RMSE trong `[0.5, 1.5]`; ngoài khoảng thì cảnh báo rõ, không che giấu.
+- [x] Không đọc test khi fit; chỉ dùng test để tính metric một lần.
+- [x] Script không import Streamlit, không import app.
 
 **Lệnh chạy:**
 
@@ -527,25 +527,25 @@ python -c "import json; print(json.load(open('reports/metrics/svd.json')))"
 
 #### Task 3 — Mở rộng `scripts/run_ranking_eval.py`
 
-- [ ] `METHODS = ("popularity", "content_based", "item_cf", "svd", "hybrid")`.
-- [ ] Import thêm `SVDRecommender`, `HybridRecommender`.
-- [ ] Khởi tạo:
+- [x] `METHODS = ("popularity", "content_based", "item_cf", "svd", "hybrid")`.
+- [x] Import thêm `SVDRecommender`, `HybridRecommender`.
+- [x] Khởi tạo:
   - Popularity trước.
   - Content-Based, Item-CF, SVD nhận fallback Popularity.
   - Hybrid nhận `models={"svd": ..., "item_cf": ..., "content_based": ...}`, `train_df=train`, fallback Popularity.
-- [ ] Giữ nguyên:
+- [x] Giữ nguyên:
   - Relevance threshold `4.0`.
   - K `5/10/20`.
   - Macro-average cùng tập user.
   - Coverage@10 trên toàn catalog.
   - Validation recommendation thuộc catalog, không trùng, không chứa phim đã xem.
   - Ghi JSON qua file tạm, lỗi không ghi đè.
-- [ ] Schema `ranking.json` giữ nguyên; `models` có đủ 5 key.
-- [ ] Không truyền test vào constructor/fit của bất kỳ model nào.
-- [ ] Cập nhật thông báo lỗi dependency từ “Day 3” thành “Day 4”.
-- [ ] Mục tiêu thời gian chạy < 5 phút; nếu chậm, ghi thời gian thực tế và tối ưu pool/vector hóa, không giảm K tùy tiện.
-- [ ] Cập nhật `tests/test_ranking_eval_script.py` theo 5 model.
-- [ ] Kết quả cũ chỉ được thay bằng kết quả chạy thật; không sửa tay số liệu.
+- [x] Schema `ranking.json` giữ nguyên; `models` có đủ 5 key.
+- [x] Không truyền test vào constructor/fit của bất kỳ model nào.
+- [x] Cập nhật thông báo lỗi dependency từ “Day 3” thành “Day 4”.
+- [x] Mục tiêu thời gian chạy < 5 phút; nếu chậm, ghi thời gian thực tế và tối ưu pool/vector hóa, không giảm K tùy tiện.
+- [x] Cập nhật `tests/test_ranking_eval_script.py` theo 5 model.
+- [x] Kết quả cũ chỉ được thay bằng kết quả chạy thật; không sửa tay số liệu.
 
 **Lệnh chạy:**
 
@@ -556,14 +556,14 @@ python -c "import json; d=json.load(open('reports/metrics/ranking.json')); print
 
 #### Task 4 — Viết `scripts/smoke_svd_hybrid.py`
 
-- [ ] Load `RecommenderService`.
-- [ ] Kiểm tra `svd`, `hybrid` đã đăng ký.
-- [ ] In top-5 SVD và top-5 Hybrid cho user `1`, `196`, `405`.
-- [ ] In similar movies SVD và Hybrid cho:
+- [x] Load `RecommenderService`.
+- [x] Kiểm tra `svd`, `hybrid` đã đăng ký.
+- [x] In top-5 SVD và top-5 Hybrid cho user `1`, `196`, `405`.
+- [x] In similar movies SVD và Hybrid cho:
   - `Toy Story (1)`
   - `Star Wars (50)`
   - `Pulp Fiction (56)`
-- [ ] Mỗi kết quả kiểm tra:
+- [x] Mỗi kết quả kiểm tra:
   - Đủ `k`, không trùng `movie_id`.
   - `method` thuộc `{"svd", "popularity"}` hoặc `{"hybrid", "popularity"}`.
   - Có reason; fallback phải ghi “Fallback”.
@@ -571,49 +571,49 @@ python -c "import json; d=json.load(open('reports/metrics/ranking.json')); print
   - SVD recommend score trong `[1, 5]`; SVD similar score trong `(0, 1]`.
   - Hybrid score trong `[0, 1]`.
   - Có ít nhất một item native, trừ trường hợp cold-start có chủ đích.
-- [ ] Kiểm tra không có phim đã xem trong top-10 với `exclude_seen=True` (dùng train).
-- [ ] Kiểm tra user `999999` fallback Popularity cho cả SVD và Hybrid.
-- [ ] Kiểm tra user metadata-only (tạm bỏ rating của một user trong bản copy train) fallback Popularity.
-- [ ] Kiểm tra phim zero-interaction (tạm bỏ tương tác của một phim trong bản copy train) fallback Popularity cho SVD.
-- [ ] Kiểm tra `movie_id` không tồn tại raise `ValueError` cho cả SVD và Hybrid.
-- [ ] Không sửa dữ liệu gốc; dùng `TemporaryDirectory` như smoke Day 3.
-- [ ] Script không import Streamlit, chỉ dùng service.
-- [ ] Exit code khác 0 nếu có case fail.
-- [ ] In đủ dữ liệu để Linh/Huy lấy ví dụ cho README và báo cáo.
+- [x] Kiểm tra không có phim đã xem trong top-10 với `exclude_seen=True` (dùng train).
+- [x] Kiểm tra user `999999` fallback Popularity cho cả SVD và Hybrid.
+- [x] Kiểm tra user metadata-only (tạm bỏ rating của một user trong bản copy train) fallback Popularity.
+- [x] Kiểm tra phim zero-interaction (tạm bỏ tương tác của một phim trong bản copy train) fallback Popularity cho SVD.
+- [x] Kiểm tra `movie_id` không tồn tại raise `ValueError` cho cả SVD và Hybrid.
+- [x] Không sửa dữ liệu gốc; dùng `TemporaryDirectory` như smoke Day 3.
+- [x] Script không import Streamlit, chỉ dùng service.
+- [x] Exit code khác 0 nếu có case fail.
+- [x] In đủ dữ liệu để Linh/Huy lấy ví dụ cho README và báo cáo.
 
 #### Task 5 — Chạy đánh giá và ghi nhận
 
-- [ ] Chạy `python scripts/run_svd_eval.py` sau khi SVD xong.
-- [ ] Chạy `python scripts/run_ranking_eval.py` sau khi service có đủ 5 model.
-- [ ] Kiểm tra `ranking.json` có đủ 5 model và 10 metric/model.
-- [ ] Kiểm tra `svd.json` có đủ trường và giá trị thật.
-- [ ] So sánh:
+- [x] Chạy `python scripts/run_svd_eval.py` sau khi SVD xong.
+- [x] Chạy `python scripts/run_ranking_eval.py` sau khi service có đủ 5 model.
+- [x] Kiểm tra `ranking.json` có đủ 5 model và 10 metric/model.
+- [x] Kiểm tra `svd.json` có đủ trường và giá trị thật.
+- [x] So sánh:
   - SVD RMSE/MAE với Popularity baseline.
   - 5 model theo Precision@10, Recall@10, NDCG@10, Coverage@10.
   - Ghi rõ model tốt nhất theo NDCG@10 và theo Coverage@10.
-- [ ] Ghi các case bất thường:
+- [x] Ghi các case bất thường:
   - SVD không cải thiện RMSE.
   - Hybrid tệ hơn từng component hoặc tệ hơn Popularity.
   - Coverage thấp/cao bất thường.
   - Nhiều user bị skip.
-- [ ] Ghi thời gian chạy ranking eval thực tế.
-- [ ] Ghi kết quả vào `notes/day4_eval.md`, gồm:
+- [x] Ghi thời gian chạy ranking eval thực tế.
+- [x] Ghi kết quả vào `notes/day4_eval.md`, gồm:
   - Protocol tóm tắt.
   - Bảng rating metrics (Popularity, SVD).
   - Bảng ranking metrics 5 model.
   - Nhận xét SVD vs baseline, Hybrid vs component.
   - Fallback/smoke coverage.
   - Giới hạn: không tune trên test, chưa có implicit feedback, score scale khác nhau.
-- [ ] Không sửa tay số liệu JSON.
-- [ ] Không so sánh trực tiếp raw score giữa các model.
+- [x] Không sửa tay số liệu JSON.
+- [x] Không so sánh trực tiếp raw score giữa các model.
 
 #### Task 6 — Review chéo
 
-- [ ] Review SVD model: chỉ train, vector hóa khớp Surprise, fallback đúng.
-- [ ] Review Hybrid: normalization, trọng số, lọc native, cold-start, tie-break.
-- [ ] Review app của Linh: kết quả hiển thị đúng method/reason, đủ 5 phương pháp, không import model.
-- [ ] Chạy lại lệnh của Huy và Linh trên máy mình.
-- [ ] Ghi review vào PR hoặc `notes/day4_review.md` nếu cần.
+- [x] Review SVD model: chỉ train, vector hóa khớp Surprise, fallback đúng.
+- [x] Review Hybrid: normalization, trọng số, lọc native, cold-start, tie-break.
+- [x] Review app của Linh: kết quả hiển thị đúng method/reason, đủ 5 phương pháp, không import model.
+- [x] Chạy lại lệnh của Huy và Linh trên máy mình.
+- [x] Ghi review vào PR hoặc `notes/day4_review.md` nếu cần.
 
 ### 3.4 Lệnh kiểm tra của Phong
 
@@ -627,15 +627,15 @@ python -c "import json; d=json.load(open('reports/metrics/ranking.json')); print
 
 ### 3.5 Tiêu chí hoàn thành
 
-- [ ] Protocol cập nhật đầy đủ SVD/Hybrid và quy tắc không tune trên test.
-- [ ] `run_svd_eval.py` chạy được, tất định, ghi đúng `svd.json`.
-- [ ] `ranking.json` có đủ 5 model và schema cũ.
-- [ ] `smoke_svd_hybrid.py` chạy được, exit code đúng.
-- [ ] Đã đánh giá 3 user và 3 phim cho SVD/Hybrid.
-- [ ] Đã kiểm tra user lạ, user không rating, phim không tương tác.
-- [ ] Không có phim đã xem trong top-K.
-- [ ] Có `notes/day4_eval.md` với số liệu thật.
-- [ ] Review xong model, metrics và app.
+- [x] Protocol cập nhật đầy đủ SVD/Hybrid và quy tắc không tune trên test.
+- [x] `run_svd_eval.py` chạy được, tất định, ghi đúng `svd.json`.
+- [x] `ranking.json` có đủ 5 model và schema cũ.
+- [x] `smoke_svd_hybrid.py` chạy được, exit code đúng.
+- [x] Đã đánh giá 3 user và 3 phim cho SVD/Hybrid.
+- [x] Đã kiểm tra user lạ, user không rating, phim không tương tác.
+- [x] Không có phim đã xem trong top-K.
+- [x] Có `notes/day4_eval.md` với số liệu thật.
+- [x] Review xong model, metrics và app.
 
 ### 3.6 Rủi ro & xử lý
 
