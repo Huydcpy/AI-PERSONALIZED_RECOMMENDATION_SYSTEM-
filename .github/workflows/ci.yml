@@ -37,9 +37,13 @@ jobs:
         run: pytest -q
       - name: Ranking evaluation
         run: python scripts/run_ranking_eval.py
+      - name: SVD rating evaluation
+        run: python scripts/run_svd_eval.py
       - name: Item-CF smoke test
         run: python scripts/smoke_item_cf.py
       - name: Content-Based smoke test
         run: python scripts/smoke_content_based.py
+      - name: SVD/Hybrid smoke test
+        run: python scripts/smoke_svd_hybrid.py
       - name: Surprise smoke test
         run: python scripts/smoke_surprise.py
