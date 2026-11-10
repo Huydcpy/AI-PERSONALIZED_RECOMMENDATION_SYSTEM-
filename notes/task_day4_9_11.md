@@ -1,5 +1,7 @@
 # TASK DAY 4 — 09/11/2026
 
+> Trạng thái 10/11/2026: code Day 4 đã merge vào `main` tại `184ecdd`. README, `notes/day4_report.md`, CI và checklist đã được cập nhật. Mục mô tả PR/screenshot của Linh vẫn để mở vì PR đã merge với body trống và không có ảnh; nội dung What/Why/How tested, ví dụ và metrics tương ứng đã có trong README và `notes/day4_report.md`. CI mới cần xác nhận sau push.
+
 ## Hướng dẫn chi tiết cho 3 thành viên
 
 **Dự án:** AI Personalized Recommendation System (MovieLens 100K)
@@ -79,12 +81,12 @@
 
 ### Việc cần dọn trước khi bắt đầu
 
-- [ ] Sync local `main` lên `origin/main` mới nhất.
-- [ ] Xác nhận `git status` sạch.
-- [ ] Tạo branch `feat/svd-hybrid`.
-- [ ] Đọc lại `notes/task_day3_7_11.md`, `notes/day3_report.md`, `notes/day3_eval.md`, `notes/day3_review.md`.
-- [ ] Đọc `docs/evaluation_protocol.md`, `src/models/base.py`, `src/models/item_cf.py`, `src/models/content_based.py`, `src/service/recommender_service.py`.
-- [ ] Chạy lại baseline kiểm tra: `pytest -q`, `ruff check .`, `python scripts/run_ranking_eval.py`.
+- [x] Sync local `main` lên `origin/main` mới nhất.
+- [x] Xác nhận `git status` sạch.
+- [x] Tạo branch `feat/svd-hybrid`.
+- [x] Đọc lại `notes/task_day3_7_11.md`, `notes/day3_report.md`, `notes/day3_eval.md`, `notes/day3_review.md`.
+- [x] Đọc `docs/evaluation_protocol.md`, `src/models/base.py`, `src/models/item_cf.py`, `src/models/content_based.py`, `src/service/recommender_service.py`.
+- [x] Chạy lại baseline kiểm tra: `pytest -q`, `ruff check .`, `python scripts/run_ranking_eval.py`.
 
 **Lệnh gợi ý:**
 
@@ -135,20 +137,20 @@ Có `SVDRecommender` và `HybridRecommender` đúng contract, service tích hợ
 
 **Fit và dữ liệu:**
 
-- [ ] Chỉ nhận `train_df` và `movies_df`; không nhận hoặc đọc `test_df`.
-- [ ] Sort `movies_df` theo `movie_id`; lưu mapping:
+- [x] Chỉ nhận `train_df` và `movies_df`; không nhận hoặc đọc `test_df`.
+- [x] Sort `movies_df` theo `movie_id`; lưu mapping:
   - `movie_ids`
   - `movie_id_to_index`
   - `index_to_movie_id`
-- [ ] Dùng `src.data.surprise_dataset.build_surprise_trainset(train_df)` để tạo trainset.
-- [ ] Fit `surprise.SVD` với hyperparameter mặc định đã chốt.
-- [ ] Lưu tập user có trong train để nhận diện cold-start.
-- [ ] Căn item factors `qi` và item bias `bi` theo thứ tự `movie_ids`; phim không có trong trainset có vector zero và `has_factors=False`.
-- [ ] Tính cosine similarity giữa các item đã có factor:
+- [x] Dùng `src.data.surprise_dataset.build_surprise_trainset(train_df)` để tạo trainset.
+- [x] Fit `surprise.SVD` với hyperparameter mặc định đã chốt.
+- [x] Lưu tập user có trong train để nhận diện cold-start.
+- [x] Căn item factors `qi` và item bias `bi` theo thứ tự `movie_ids`; phim không có trong trainset có vector zero và `has_factors=False`.
+- [x] Tính cosine similarity giữa các item đã có factor:
   - Normalize từng hàng factor vector.
   - `similarity = clip(normalized @ normalized.T, 0, 1)`.
   - Đặt diagonal bằng `0`.
-- [ ] Phim không có tương tác train: không crash, không có similarity dương; fallback Popularity khi cần.
+- [x] Phim không có tương tác train: không crash, không có similarity dương; fallback Popularity khi cần.
 
 **API dự kiến:**
 
@@ -185,44 +187,44 @@ class SVDRecommender:
 
 **`predict_rating`:**
 
-- [ ] Dùng dự đoán của Surprise cho cặp user/movie; trả `float` đã clip `[1, 5]`.
-- [ ] User hoặc movie không có trong trainset: trả global mean (hoặc giá trị Surprise trả về), không crash.
-- [ ] Dùng hàm này trong `scripts/run_svd_eval.py` để chỉ có một đường tính rating.
+- [x] Dùng dự đoán của Surprise cho cặp user/movie; trả `float` đã clip `[1, 5]`.
+- [x] User hoặc movie không có trong trainset: trả global mean (hoặc giá trị Surprise trả về), không crash.
+- [x] Dùng hàm này trong `scripts/run_svd_eval.py` để chỉ có một đường tính rating.
 
 **`recommend`:**
 
-- [ ] `k <= 0`: trả danh sách rỗng.
-- [ ] User không có trong train: fallback Popularity, method `"popularity"`, reason `"Fallback phổ biến (cold-start)"`.
-- [ ] Với user hợp lệ, tính điểm cho toàn bộ phim có factor trong train:
+- [x] `k <= 0`: trả danh sách rỗng.
+- [x] User không có trong train: fallback Popularity, method `"popularity"`, reason `"Fallback phổ biến (cold-start)"`.
+- [x] Với user hợp lệ, tính điểm cho toàn bộ phim có factor trong train:
   - Vector hóa theo công thức `mu + b_u + b_i + p_u · q_i`.
   - Clip `[1, 5]`.
   - Không lặp từng cặp bằng `algo.predict` để tránh chậm; chỉ dùng vector hóa.
-- [ ] `exclude_seen=True`: loại phim user đã rating trong **train**.
-- [ ] Sort score giảm dần, tie-break `movie_id` tăng dần; trả tối đa `k`.
-- [ ] Item native:
+- [x] `exclude_seen=True`: loại phim user đã rating trong **train**.
+- [x] Sort score giảm dần, tie-break `movie_id` tăng dần; trả tối đa `k`.
+- [x] Item native:
   - `method="svd"`.
   - reason `"Dự đoán theo sở thích cá nhân (SVD)"`.
-- [ ] Không đủ item / không có tín hiệu:
+- [x] Không đủ item / không có tín hiệu:
   - Nối Popularity sau kết quả SVD, chống trùng.
   - method `"popularity"`.
   - reason `"Fallback phổ biến (thiếu tín hiệu)"`.
 
 **`similar_items`:**
 
-- [ ] Movie ID không tồn tại: raise `ValueError(f"Movie {movie_id} không tồn tại")`.
-- [ ] `k <= 0`: trả danh sách rỗng.
-- [ ] Lấy similarity vector của phim gốc; loại chính nó; chỉ giữ `score > 0`.
-- [ ] Sort giảm dần, tie-break `movie_id`; trả tối đa `k`.
-- [ ] Item native:
+- [x] Movie ID không tồn tại: raise `ValueError(f"Movie {movie_id} không tồn tại")`.
+- [x] `k <= 0`: trả danh sách rỗng.
+- [x] Lấy similarity vector của phim gốc; loại chính nó; chỉ giữ `score > 0`.
+- [x] Sort giảm dần, tie-break `movie_id`; trả tối đa `k`.
+- [x] Item native:
   - `method="svd"`.
   - reason `"Cùng gu người dùng (SVD)"`.
-- [ ] Phim không có factor / không đủ kết quả: fallback Popularity, reason `"Fallback phổ biến (thiếu tín hiệu)"`.
+- [x] Phim không có factor / không đủ kết quả: fallback Popularity, reason `"Fallback phổ biến (thiếu tín hiệu)"`.
 
 **Kiểm chứng bắt buộc:**
 
-- [ ] So sánh điểm vector hóa với `algo.predict(uid, iid).est` trên một số cặp known user/item; sai lệch tối đa `1e-6` sau clip.
-- [ ] Chạy 2 lần cùng dữ liệu cho kết quả giống nhau (random_state + tie-break).
-- [ ] Không dùng test ở bất kỳ bước fit/profile/similarity.
+- [x] So sánh điểm vector hóa với `algo.predict(uid, iid).est` trên một số cặp known user/item; sai lệch tối đa `1e-6` sau clip.
+- [x] Chạy 2 lần cùng dữ liệu cho kết quả giống nhau (random_state + tie-break).
+- [x] Không dùng test ở bất kỳ bước fit/profile/similarity.
 
 #### Task 2 — Viết `src/models/hybrid.py`
 
@@ -255,134 +257,134 @@ class HybridRecommender:
 
 **Khởi tạo và trọng số:**
 
-- [ ] `models` phải có đủ key `svd`, `item_cf`, `content_based`; thiếu key raise `ValueError`.
-- [ ] Trọng số mặc định:
+- [x] `models` phải có đủ key `svd`, `item_cf`, `content_based`; thiếu key raise `ValueError`.
+- [x] Trọng số mặc định:
   - `recommend_weights = {"svd": 0.5, "item_cf": 0.3, "content_based": 0.2}`
   - `similar_weights = {"item_cf": 0.4, "svd": 0.3, "content_based": 0.3}`
-- [ ] Kiểm tra trọng số: không âm, tổng > 0, không có key lạ; normalize về tổng 1.
-- [ ] Lưu `known_users = set(train_df.user_id)` để nhận diện cold-start; không dùng test.
+- [x] Kiểm tra trọng số: không âm, tổng > 0, không có key lạ; normalize về tổng 1.
+- [x] Lưu `known_users = set(train_df.user_id)` để nhận diện cold-start; không dùng test.
 
 **Blend:**
 
-- [ ] Candidate pool mỗi component: `pool = max(50, k * 3)`.
-- [ ] Gọi từng component với `k=pool`, `exclude_seen` tương ứng.
-- [ ] Chỉ giữ item có `item.method == tên component`; loại item fallback Popularity của component.
-- [ ] Min-max normalize score từng component:
+- [x] Candidate pool mỗi component: `pool = max(50, k * 3)`.
+- [x] Gọi từng component với `k=pool`, `exclude_seen` tương ứng.
+- [x] Chỉ giữ item có `item.method == tên component`; loại item fallback Popularity của component.
+- [x] Min-max normalize score từng component:
   - `norm = (score - min) / (max - min)`.
   - Nếu `max == min` (một item hoặc toàn bộ bằng nhau), gán `norm = 1.0`.
-- [ ] Blended score = tổng `weight * norm`; item không xuất hiện ở component nào nhận phần đóng góp `0`.
-- [ ] Loại trùng `movie_id`; sort blended score giảm dần, tie-break `movie_id` tăng dần.
-- [ ] Trả tối đa `k`; score cuối trong `[0, 1]`.
+- [x] Blended score = tổng `weight * norm`; item không xuất hiện ở component nào nhận phần đóng góp `0`.
+- [x] Loại trùng `movie_id`; sort blended score giảm dần, tie-break `movie_id` tăng dần.
+- [x] Trả tối đa `k`; score cuối trong `[0, 1]`.
 
 **`recommend`:**
 
-- [ ] `k <= 0`: trả danh sách rỗng.
-- [ ] User không có trong train / không có rating trong train:
+- [x] `k <= 0`: trả danh sách rỗng.
+- [x] User không có trong train / không có rating trong train:
   - Fallback Popularity.
   - method `"popularity"`.
   - reason `"Fallback phổ biến (cold-start)"`.
-- [ ] Item native:
+- [x] Item native:
   - `method="hybrid"`.
   - reason `"Kết hợp SVD + Item-CF + Content-Based"`.
-- [ ] Không đủ item sau blend:
+- [x] Không đủ item sau blend:
   - Nối Popularity, chống trùng.
   - method `"popularity"`.
   - reason `"Fallback phổ biến (thiếu tín hiệu)"`.
 
 **`similar_items`:**
 
-- [ ] Movie ID không tồn tại: raise `ValueError(f"Movie {movie_id} không tồn tại")`.
-- [ ] `k <= 0`: trả danh sách rỗng.
-- [ ] Blend theo `similar_weights` từ `similar_items` của 3 component; cùng quy tắc pool, lọc native, min-max, tie-break.
-- [ ] Item native:
+- [x] Movie ID không tồn tại: raise `ValueError(f"Movie {movie_id} không tồn tại")`.
+- [x] `k <= 0`: trả danh sách rỗng.
+- [x] Blend theo `similar_weights` từ `similar_items` của 3 component; cùng quy tắc pool, lọc native, min-max, tie-break.
+- [x] Item native:
   - `method="hybrid"`.
   - reason `"Kết hợp độ tương đồng SVD + Item-CF + Content-Based"`.
-- [ ] Loại chính nó; không đủ kết quả thì fallback Popularity, reason `"Fallback phổ biến (thiếu tín hiệu)"`.
+- [x] Loại chính nó; không đủ kết quả thì fallback Popularity, reason `"Fallback phổ biến (thiếu tín hiệu)"`.
 
 **Ghi chú thiết kế bắt buộc:**
 
-- [ ] Không gọi đệ quy Hybrid từ chính nó.
-- [ ] Không trộn trực tiếp score thô giữa các component; chỉ dùng score đã normalize.
-- [ ] Không dùng kết quả test để chọn trọng số hoặc pool.
-- [ ] Score Hybrid là điểm blend `[0, 1]`, không so sánh trực tiếp với predicted rating của SVD/Item-CF.
+- [x] Không gọi đệ quy Hybrid từ chính nó.
+- [x] Không trộn trực tiếp score thô giữa các component; chỉ dùng score đã normalize.
+- [x] Không dùng kết quả test để chọn trọng số hoặc pool.
+- [x] Score Hybrid là điểm blend `[0, 1]`, không so sánh trực tiếp với predicted rating của SVD/Item-CF.
 
 #### Task 3 — Tích hợp service
 
 Sửa `src/service/recommender_service.py`:
 
-- [ ] Khởi tạo theo thứ tự: Popularity → Content-Based → Item-CF → SVD → Hybrid.
-- [ ] SVD nhận fallback Popularity.
-- [ ] Hybrid nhận `models={"svd": ..., "item_cf": ..., "content_based": ...}`, `train_df=self.train_df`, fallback Popularity.
-- [ ] Bọc import SVD/Hybrid bằng `try/except ImportError` giống Content-Based để app vẫn khởi động nếu thiếu Surprise.
-- [ ] Nếu SVD/Hybrid chưa đăng ký:
+- [x] Khởi tạo theo thứ tự: Popularity → Content-Based → Item-CF → SVD → Hybrid.
+- [x] SVD nhận fallback Popularity.
+- [x] Hybrid nhận `models={"svd": ..., "item_cf": ..., "content_based": ...}`, `train_df=self.train_df`, fallback Popularity.
+- [x] Bọc import SVD/Hybrid bằng `try/except ImportError` giống Content-Based để app vẫn khởi động nếu thiếu Surprise.
+- [x] Nếu SVD/Hybrid chưa đăng ký:
   - `recommend`/`similar_items` với method tương ứng raise `RuntimeError` rõ ràng, ví dụ `"SVDRecommender chưa sẵn sàng: thiếu model hoặc dữ liệu train/movies"`.
-- [ ] Thêm `self.models["svd"]` và `self.models["hybrid"]`.
-- [ ] `recommend(..., method="svd"/"hybrid")` hoạt động.
-- [ ] `similar_items(..., method="svd"/"hybrid")` hoạt động.
-- [ ] Method không hỗ trợ:
+- [x] Thêm `self.models["svd"]` và `self.models["hybrid"]`.
+- [x] `recommend(..., method="svd"/"hybrid")` hoạt động.
+- [x] `similar_items(..., method="svd"/"hybrid")` hoạt động.
+- [x] Method không hỗ trợ:
   `ValueError(f"Method {method} không được hỗ trợ")`.
-- [ ] Thêm `get_svd_metrics() -> dict`:
+- [x] Thêm `get_svd_metrics() -> dict`:
   - Đọc `reports/metrics/svd.json`.
   - Trả `{}` nếu chưa có.
-- [ ] Giữ `get_baseline_metrics()` và `get_ranking_metrics()`.
-- [ ] Không đổi response contract `Recommendation`.
-- [ ] Service vẫn không import Streamlit.
-- [ ] Không dùng `self.test_df` trong init/fit của bất kỳ model nào.
+- [x] Giữ `get_baseline_metrics()` và `get_ranking_metrics()`.
+- [x] Không đổi response contract `Recommendation`.
+- [x] Service vẫn không import Streamlit.
+- [x] Không dùng `self.test_df` trong init/fit của bất kỳ model nào.
 
 #### Task 4 — Unit test
 
 Tạo `tests/test_svd.py` với DataFrame giả (không phụ thuộc data thật):
 
-- [ ] `recommend` trả đủ k cho user hợp lệ; method native là `"svd"`; score trong `[1, 5]`.
-- [ ] `recommend` loại phim đã xem khi `exclude_seen=True`.
-- [ ] `recommend` với `exclude_seen=False` vẫn có thể trả phim đã xem.
-- [ ] User lạ fallback Popularity, method `"popularity"`, reason cold-start.
-- [ ] User không có rating trong train fallback Popularity.
-- [ ] Phim không có tương tác fallback khi `similar_items`.
-- [ ] `similar_items` trả item tương tự, loại chính nó, tôn trọng `k`, score trong `(0, 1]` với item native.
-- [ ] Movie không tồn tại raise `ValueError`.
-- [ ] `k <= 0` trả danh sách rỗng cho cả `recommend` và `similar_items`.
-- [ ] Kết quả deterministic khi score bằng nhau (tie-break `movie_id`).
-- [ ] `predict_rating` trả `float` trong `[1, 5]`, kể cả user/movie lạ.
-- [ ] Điểm vector hóa khớp `algo.predict` với dung sai `1e-6` trên vài cặp known.
-- [ ] Test dùng hyperparameter nhỏ (`n_factors=2`, `n_epochs=2`) để nhanh.
+- [x] `recommend` trả đủ k cho user hợp lệ; method native là `"svd"`; score trong `[1, 5]`.
+- [x] `recommend` loại phim đã xem khi `exclude_seen=True`.
+- [x] `recommend` với `exclude_seen=False` vẫn có thể trả phim đã xem.
+- [x] User lạ fallback Popularity, method `"popularity"`, reason cold-start.
+- [x] User không có rating trong train fallback Popularity.
+- [x] Phim không có tương tác fallback khi `similar_items`.
+- [x] `similar_items` trả item tương tự, loại chính nó, tôn trọng `k`, score trong `(0, 1]` với item native.
+- [x] Movie không tồn tại raise `ValueError`.
+- [x] `k <= 0` trả danh sách rỗng cho cả `recommend` và `similar_items`.
+- [x] Kết quả deterministic khi score bằng nhau (tie-break `movie_id`).
+- [x] `predict_rating` trả `float` trong `[1, 5]`, kể cả user/movie lạ.
+- [x] Điểm vector hóa khớp `algo.predict` với dung sai `1e-6` trên vài cặp known.
+- [x] Test dùng hyperparameter nhỏ (`n_factors=2`, `n_epochs=2`) để nhanh.
 
 Tạo `tests/test_hybrid.py` với fake component models:
 
-- [ ] Trọng số mặc định đúng và được normalize.
-- [ ] Trọng số âm / tổng bằng 0 / key lạ / thiếu key raise `ValueError`.
-- [ ] Blend đúng một ví dụ tính tay sau min-max.
-- [ ] Chỉ blend item native; item fallback Popularity của component bị loại.
-- [ ] Item chỉ có ở một component vẫn nhận đúng phần đóng góp.
-- [ ] `max == min` trong một component được normalize thành `1.0`.
-- [ ] `recommend` loại phim đã xem khi `exclude_seen=True`.
-- [ ] User lạ / cold-start fallback Popularity, method `"popularity"`, reason cold-start.
-- [ ] Thiếu item sau blend được fill Popularity, method `"popularity"`, reason thiếu tín hiệu.
-- [ ] `similar_items` loại chính nó; movie không tồn tại raise `ValueError`; `k <= 0` trả rỗng.
-- [ ] Kết quả deterministic, tie-break `movie_id`.
-- [ ] Không phụ thuộc data thật hoặc model thật.
+- [x] Trọng số mặc định đúng và được normalize.
+- [x] Trọng số âm / tổng bằng 0 / key lạ / thiếu key raise `ValueError`.
+- [x] Blend đúng một ví dụ tính tay sau min-max.
+- [x] Chỉ blend item native; item fallback Popularity của component bị loại.
+- [x] Item chỉ có ở một component vẫn nhận đúng phần đóng góp.
+- [x] `max == min` trong một component được normalize thành `1.0`.
+- [x] `recommend` loại phim đã xem khi `exclude_seen=True`.
+- [x] User lạ / cold-start fallback Popularity, method `"popularity"`, reason cold-start.
+- [x] Thiếu item sau blend được fill Popularity, method `"popularity"`, reason thiếu tín hiệu.
+- [x] `similar_items` loại chính nó; movie không tồn tại raise `ValueError`; `k <= 0` trả rỗng.
+- [x] Kết quả deterministic, tie-break `movie_id`.
+- [x] Không phụ thuộc data thật hoặc model thật.
 
 Cập nhật test service:
 
-- [ ] `svd` và `hybrid` đã đăng ký (surprise có trong môi trường test).
-- [ ] `recommend` và `similar_items` với `svd`, `hybrid` hoạt động.
-- [ ] `get_svd_metrics()` trả `{}` khi thiếu file và đọc đúng khi có file.
-- [ ] Method invalid raise `ValueError` với thông báo `"không được hỗ trợ"`, không còn chuỗi “Day 4”.
-- [ ] Trường hợp thiếu dependency SVD (monkeypatch import) raise `RuntimeError` rõ ràng.
+- [x] `svd` và `hybrid` đã đăng ký (surprise có trong môi trường test).
+- [x] `recommend` và `similar_items` với `svd`, `hybrid` hoạt động.
+- [x] `get_svd_metrics()` trả `{}` khi thiếu file và đọc đúng khi có file.
+- [x] Method invalid raise `ValueError` với thông báo `"không được hỗ trợ"`, không còn chuỗi “Day 4”.
+- [x] Trường hợp thiếu dependency SVD (monkeypatch import) raise `RuntimeError` rõ ràng.
 
 Cập nhật `tests/test_ranking_eval_script.py`:
 
-- [ ] `METHODS` có 5 phương pháp theo đúng thứ tự.
-- [ ] CLI mock trả đủ 5 model và schema 10 metric/model.
-- [ ] Hybrid nhận `train_df` chỉ từ train; không thấy test trong factory.
-- [ ] Test thất bại không ghi đè `ranking.json`.
+- [x] `METHODS` có 5 phương pháp theo đúng thứ tự.
+- [x] CLI mock trả đủ 5 model và schema 10 metric/model.
+- [x] Hybrid nhận `train_df` chỉ từ train; không thấy test trong factory.
+- [x] Test thất bại không ghi đè `ranking.json`.
 
 #### Task 5 — Review & tích hợp
 
-- [ ] Review `run_svd_eval.py` và protocol của Phong: SVD chỉ fit train, test dùng một lần, không tune.
-- [ ] Review ranking eval: đủ 5 model, cùng tập user, macro-average đúng, coverage giữ nguyên.
-- [ ] Review app của Linh: không import trực tiếp model, cache đúng, hiển thị method/reason, 5 phương pháp không vỡ layout.
-- [ ] Chạy:
+- [x] Review `run_svd_eval.py` và protocol của Phong: SVD chỉ fit train, test dùng một lần, không tune.
+- [x] Review ranking eval: đủ 5 model, cùng tập user, macro-average đúng, coverage giữ nguyên.
+- [x] Review app của Linh: không import trực tiếp model, cache đúng, hiển thị method/reason, 5 phương pháp không vỡ layout.
+- [x] Chạy:
   ```bash
   pytest -q
   ruff check .
@@ -391,9 +393,9 @@ Cập nhật `tests/test_ranking_eval_script.py`:
   python scripts/smoke_svd_hybrid.py
   python scripts/smoke_item_cf.py
   ```
-- [ ] Kiểm tra `git status`: không có data/model lớn, không có secret.
-- [ ] Review PR, merge khi CI xanh.
-- [ ] Viết `notes/day4_report.md`.
+- [x] Kiểm tra `git status`: không có data/model lớn, không có secret.
+- [x] Review PR, merge khi CI xanh.
+- [x] Viết `notes/day4_report.md`.
 
 ### 2.4 Lệnh kiểm tra của Huy
 
@@ -410,18 +412,18 @@ python scripts/smoke_svd_hybrid.py
 
 ### 2.5 Tiêu chí hoàn thành
 
-- [ ] `SVDRecommender` đúng contract, chỉ dùng train để fit.
-- [ ] SVD recommend trả top-K predicted rating, clip `[1, 5]`, loại seen đúng.
-- [ ] SVD similar_items dựa trên latent factors, loại chính nó, fallback đúng.
-- [ ] `HybridRecommender` blend đúng 3 component, score `[0, 1]`, reason rõ.
-- [ ] User lạ / user không có rating / phim không tương tác fallback Popularity, không crash.
-- [ ] Service hỗ trợ đủ 5 method: `popularity`, `content_based`, `item_cf`, `svd`, `hybrid`.
-- [ ] `get_svd_metrics()` hoạt động.
-- [ ] Thông báo method invalid không còn “Day 4”.
-- [ ] Unit test pass, không phụ thuộc data thật.
-- [ ] Review xong PR của Phong và Linh.
-- [ ] PR được merge, CI xanh.
-- [ ] Có báo cáo Day 4.
+- [x] `SVDRecommender` đúng contract, chỉ dùng train để fit.
+- [x] SVD recommend trả top-K predicted rating, clip `[1, 5]`, loại seen đúng.
+- [x] SVD similar_items dựa trên latent factors, loại chính nó, fallback đúng.
+- [x] `HybridRecommender` blend đúng 3 component, score `[0, 1]`, reason rõ.
+- [x] User lạ / user không có rating / phim không tương tác fallback Popularity, không crash.
+- [x] Service hỗ trợ đủ 5 method: `popularity`, `content_based`, `item_cf`, `svd`, `hybrid`.
+- [x] `get_svd_metrics()` hoạt động.
+- [x] Thông báo method invalid không còn “Day 4”.
+- [x] Unit test pass, không phụ thuộc data thật.
+- [x] Review xong PR của Phong và Linh.
+- [x] PR được merge, CI xanh.
+- [x] Có báo cáo Day 4.
 
 ### 2.6 Rủi ro & xử lý
 
@@ -676,95 +678,95 @@ python -c "import json; d=json.load(open('reports/metrics/ranking.json')); print
 
 #### Task 1 — Review UI hiện tại
 
-- [ ] Đọc `app/pages/2_Recommendations.py`, `3_Similar_Movies.py`, `4_Compare_Methods.py`, `5_Evaluation.py`, `app/Home.py`.
-- [ ] Xác nhận app chỉ import `src.service`, không import `src.models`.
-- [ ] Xác nhận `st.cache_resource` cho service và `st.cache_data` cho metrics.
-- [ ] Ghi lại các chỗ hard-code 3 phương pháp để cập nhật đồng bộ.
+- [x] Đọc `app/pages/2_Recommendations.py`, `3_Similar_Movies.py`, `4_Compare_Methods.py`, `5_Evaluation.py`, `app/Home.py`.
+- [x] Xác nhận app chỉ import `src.service`, không import `src.models`.
+- [x] Xác nhận `st.cache_resource` cho service và `st.cache_data` cho metrics.
+- [x] Ghi lại các chỗ hard-code 3 phương pháp để cập nhật đồng bộ.
 
 #### Task 2 — Cập nhật Recommendations page
 
-- [ ] Selectbox phương pháp gồm 5 lựa chọn:
+- [x] Selectbox phương pháp gồm 5 lựa chọn:
   - `Popularity` → `popularity`
   - `Content-Based` → `content_based`
   - `Item-Based CF` → `item_cf`
   - `SVD` → `svd`
   - `Hybrid` → `hybrid`
-- [ ] Cập nhật `help` text: SVD dự đoán rating theo latent factors; Hybrid kết hợp SVD + Item-CF + Content-Based.
-- [ ] Giữ slider K 5–20 và checkbox “Loại bỏ phim đã xem”.
-- [ ] Hiển thị method và reason trên card.
-- [ ] Xử lý danh sách rỗng và lỗi service.
-- [ ] Không thay đổi hành vi mặc định nếu không cần.
+- [x] Cập nhật `help` text: SVD dự đoán rating theo latent factors; Hybrid kết hợp SVD + Item-CF + Content-Based.
+- [x] Giữ slider K 5–20 và checkbox “Loại bỏ phim đã xem”.
+- [x] Hiển thị method và reason trên card.
+- [x] Xử lý danh sách rỗng và lỗi service.
+- [x] Không thay đổi hành vi mặc định nếu không cần.
 
 #### Task 3 — Cập nhật Similar Movies page
 
-- [ ] Thêm lựa chọn phương pháp:
+- [x] Thêm lựa chọn phương pháp:
   - `content_based`
   - `item_cf`
   - `svd`
   - `hybrid`
-- [ ] Cập nhật caption: Content-Based theo thể loại; Item-CF/SVD theo latent/co-occurrence; Hybrid kết hợp; phim thiếu tín hiệu dùng Popularity.
-- [ ] Giữ tìm kiếm phim + selectbox + slider K.
-- [ ] Gọi `service.similar_items(movie_id, k=k, method=method)`.
-- [ ] Hiển thị method/reason thực tế; không tự suy diễn reason.
-- [ ] Xử lý phim không tồn tại / không có kết quả.
+- [x] Cập nhật caption: Content-Based theo thể loại; Item-CF/SVD theo latent/co-occurrence; Hybrid kết hợp; phim thiếu tín hiệu dùng Popularity.
+- [x] Giữ tìm kiếm phim + selectbox + slider K.
+- [x] Gọi `service.similar_items(movie_id, k=k, method=method)`.
+- [x] Hiển thị method/reason thực tế; không tự suy diễn reason.
+- [x] Xử lý phim không tồn tại / không có kết quả.
 
 #### Task 4 — Cập nhật Compare Methods page
 
-- [ ] So sánh đủ 5 phương pháp: Popularity, Content-Based, Item-CF, SVD, Hybrid.
-- [ ] Dùng `st.tabs` để tránh 3 cột bị chật; mỗi tab một phương pháp.
-- [ ] Hiển thị method/reason/score trên card.
-- [ ] Ghi rõ thang đo khác nhau:
+- [x] So sánh đủ 5 phương pháp: Popularity, Content-Based, Item-CF, SVD, Hybrid.
+- [x] Dùng `st.tabs` để tránh 3 cột bị chật; mỗi tab một phương pháp.
+- [x] Hiển thị method/reason/score trên card.
+- [x] Ghi rõ thang đo khác nhau:
   - Popularity: điểm phổ biến.
   - Content-Based: cosine `[0, 1]`.
   - Item-CF/SVD: predicted rating `[1, 5]`.
   - Hybrid: blended score `[0, 1]`.
-- [ ] Không so sánh raw score giữa các tab; chỉ so sánh danh sách.
-- [ ] Xử lý lỗi từng tab độc lập, không làm sập cả trang.
-- [ ] AppTest kỳ vọng 5 tab × 10 card = 50 metric với K mặc định 10.
+- [x] Không so sánh raw score giữa các tab; chỉ so sánh danh sách.
+- [x] Xử lý lỗi từng tab độc lập, không làm sập cả trang.
+- [x] AppTest kỳ vọng 5 tab × 10 card = 50 metric với K mặc định 10.
 
 #### Task 5 — Cập nhật Evaluation page
 
-- [ ] Đọc baseline qua `get_metrics()` và SVD qua service/`get_svd_metrics()`.
-- [ ] Hiển thị bảng Rating Prediction:
+- [x] Đọc baseline qua `get_metrics()` và SVD qua service/`get_svd_metrics()`.
+- [x] Hiển thị bảng Rating Prediction:
   - Model
   - RMSE
   - MAE
   - Ghi chú
-- [ ] Hàng Popularity lấy từ `baseline.json`; hàng SVD lấy từ `svd.json`.
-- [ ] Nếu thiếu `svd.json`:
+- [x] Hàng Popularity lấy từ `baseline.json`; hàng SVD lấy từ `svd.json`.
+- [x] Nếu thiếu `svd.json`:
   “Chưa có reports/metrics/svd.json. Hãy chạy python scripts/run_svd_eval.py.”
-- [ ] Giữ phần baseline RMSE/MAE; không ghi đè số liệu Day 1.
-- [ ] Bảng ranking mở rộng 5 model theo thứ tự:
+- [x] Giữ phần baseline RMSE/MAE; không ghi đè số liệu Day 1.
+- [x] Bảng ranking mở rộng 5 model theo thứ tự:
   Popularity, Content-Based, Item-CF, SVD, Hybrid.
-- [ ] Giữ các cột: Precision@5, Precision@10, Recall@10, NDCG@10, Coverage@10.
-- [ ] Cập nhật caption: “5 phương pháp; test set; relevance >= 4.0; không so sánh trực tiếp score”.
-- [ ] Xử lý `ranking.json` chưa có bằng empty state như hiện tại.
-- [ ] Bỏ mọi ghi chú còn nói SVD/Hybrid “sẽ có”.
+- [x] Giữ các cột: Precision@5, Precision@10, Recall@10, NDCG@10, Coverage@10.
+- [x] Cập nhật caption: “5 phương pháp; test set; relevance >= 4.0; không so sánh trực tiếp score”.
+- [x] Xử lý `ranking.json` chưa có bằng empty state như hiện tại.
+- [x] Bỏ mọi ghi chú còn nói SVD/Hybrid “sẽ có”.
 
 #### Task 6 — Cập nhật Home và cache
 
-- [ ] `app/components/service.py`: thêm `get_svd_metrics()` có `@st.cache_data(ttl=60)`, gọi `get_service().get_svd_metrics()`.
-- [ ] `app/Home.py`:
+- [x] `app/components/service.py`: thêm `get_svd_metrics()` có `@st.cache_data(ttl=60)`, gọi `get_service().get_svd_metrics()`.
+- [x] `app/Home.py`:
   - Cập nhật danh sách model: Popularity, Content-Based, Item-CF, SVD, Hybrid.
   - Ghi SVD có rating metrics RMSE/MAE; ranking metrics đủ 5 model.
   - Không thêm metric mới ngoài baseline/SVD.
-- [ ] Sidebar/home caption phản ánh đủ 5 phương pháp.
+- [x] Sidebar/home caption phản ánh đủ 5 phương pháp.
 
 #### Task 7 — README và CI
 
-- [ ] Cập nhật kiến trúc: SVD và Hybrid đã có.
-- [ ] Cập nhật roadmap: Day 4 hoàn thành; Day 5 là đánh giá/báo cáo/demo.
-- [ ] Thêm mục “Kết quả Day 4” chỉ sau khi có số liệu thật:
+- [x] Cập nhật kiến trúc: SVD và Hybrid đã có.
+- [x] Cập nhật roadmap: Day 4 hoàn thành; Day 5 là đánh giá/báo cáo/demo.
+- [x] Thêm mục “Kết quả Day 4” chỉ sau khi có số liệu thật:
   - Bảng Rating Prediction: Popularity vs SVD.
   - Bảng ranking metrics 5 model.
   - Ví dụ top-5 SVD và Hybrid cho 1 user.
   - Ví dụ similar movies SVD và Hybrid cho 1 phim.
   - Hạn chế: SVD cần đủ dữ liệu, Hybrid phụ thuộc component, cold-start fallback Popularity, score scale khác nhau.
-- [ ] Cập nhật lệnh chạy:
+- [x] Cập nhật lệnh chạy:
   - `python scripts/run_svd_eval.py`
   - `python scripts/smoke_svd_hybrid.py`
-- [ ] Không ghi đè RMSE/MAE của Popularity.
-- [ ] Cập nhật CI:
+- [x] Không ghi đè RMSE/MAE của Popularity.
+- [x] Cập nhật CI:
   - `ruff check .`
   - `pytest -q`
   - `python scripts/run_svd_eval.py`
@@ -773,30 +775,30 @@ python -c "import json; d=json.load(open('reports/metrics/ranking.json')); print
   - `python scripts/smoke_content_based.py`
   - `python scripts/smoke_svd_hybrid.py`
   - Giữ bước app boundary grep và smoke Surprise nếu thời gian cho phép.
-- [ ] Nếu tổng thời gian CI vượt 20 phút, tăng `timeout-minutes` lên 30 và ghi lý do trong PR.
+- [x] Nếu tổng thời gian CI vượt 20 phút, tăng `timeout-minutes` lên 30 và ghi lý do trong PR.
 
 #### Task 8 — Kiểm tra app, AppTest và PR
 
-- [ ] Chạy `streamlit run app/Home.py`.
-- [ ] Chọn 3 user, top-10 SVD và Hybrid hiển thị.
-- [ ] Chọn 3 phim, similar movies SVD và Hybrid hiển thị.
-- [ ] Compare hiển thị đủ 5 tab, không vỡ layout.
-- [ ] Evaluation hiển thị rating table và ranking 5 model.
-- [ ] User không tồn tại không crash.
-- [ ] `exclude_seen=True` không trả phim đã xem.
-- [ ] App không import trực tiếp model.
-- [ ] Sau cache, phản hồi < 2 giây.
-- [ ] Cập nhật `tests/test_app.py`:
+- [x] Chạy `streamlit run app/Home.py`.
+- [x] Chọn 3 user, top-10 SVD và Hybrid hiển thị.
+- [x] Chọn 3 phim, similar movies SVD và Hybrid hiển thị.
+- [x] Compare hiển thị đủ 5 tab, không vỡ layout.
+- [x] Evaluation hiển thị rating table và ranking 5 model.
+- [x] User không tồn tại không crash.
+- [x] `exclude_seen=True` không trả phim đã xem.
+- [x] App không import trực tiếp model.
+- [x] Sau cache, phản hồi < 2 giây.
+- [x] Cập nhật `tests/test_app.py`:
   - Tất cả trang load không exception.
   - Recommendations với `svd`, `hybrid` cho user 1/196/405.
   - Similar Movies với `svd`, `hybrid` cho 3 phim.
   - Compare đủ 5 tab, 50 metric với K=10.
   - Evaluation có 2 dataframe: rating table + ranking table.
-- [ ] Branch `feat/svd-hybrid`.
-- [ ] PR title: `feat(model): add SVD and hybrid recommender`.
+- [x] Branch `feat/svd-hybrid`.
+- [x] PR title: `feat(model): add SVD and hybrid recommender`.
 - [ ] Mô tả What / Why / How tested / Screenshot.
-- [ ] Gắn ví dụ top-5, rating/ranking metrics, fallback cases.
-- [ ] Nhờ Huy/Phong review.
+- [x] Gắn ví dụ top-5, rating/ranking metrics, fallback cases.
+- [x] Nhờ Huy/Phong review.
 
 ### 4.4 Lệnh kiểm tra của Linh
 
@@ -809,17 +811,17 @@ streamlit run app/Home.py
 
 ### 4.5 Tiêu chí hoàn thành
 
-- [ ] Page 2 chọn được 5 phương pháp.
-- [ ] Page 3 chọn được Content-Based / Item-CF / SVD / Hybrid.
-- [ ] Page 4 so sánh 5 phương pháp bằng tab, không vỡ layout.
-- [ ] Page 5 hiển thị RMSE/MAE của Popularity + SVD và ranking 5 model.
-- [ ] Home mô tả đúng 5 phương pháp.
-- [ ] App không import trực tiếp model.
-- [ ] Cache hoạt động.
-- [ ] README cập nhật.
-- [ ] AppTest pass.
-- [ ] CI xanh.
-- [ ] PR được review + merge.
+- [x] Page 2 chọn được 5 phương pháp.
+- [x] Page 3 chọn được Content-Based / Item-CF / SVD / Hybrid.
+- [x] Page 4 so sánh 5 phương pháp bằng tab, không vỡ layout.
+- [x] Page 5 hiển thị RMSE/MAE của Popularity + SVD và ranking 5 model.
+- [x] Home mô tả đúng 5 phương pháp.
+- [x] App không import trực tiếp model.
+- [x] Cache hoạt động.
+- [x] README cập nhật.
+- [x] AppTest pass.
+- [x] CI xanh.
+- [x] PR được review + merge.
 
 ### 4.6 Rủi ro & xử lý
 
@@ -869,66 +871,66 @@ streamlit run app/Home.py
 
 ### Model
 
-- [ ] `SVDRecommender` đúng contract.
-- [ ] `HybridRecommender` đúng contract.
-- [ ] Chỉ dùng train để fit và tạo profile.
-- [ ] SVD vector hóa khớp `algo.predict`.
-- [ ] Hybrid normalize đúng, score `[0, 1]`.
-- [ ] Similar items loại chính nó.
-- [ ] Fallback Popularity cho cold-start/không tín hiệu.
-- [ ] Không đọc test data khi fit.
-- [ ] Kết quả deterministic.
+- [x] `SVDRecommender` đúng contract.
+- [x] `HybridRecommender` đúng contract.
+- [x] Chỉ dùng train để fit và tạo profile.
+- [x] SVD vector hóa khớp `algo.predict`.
+- [x] Hybrid normalize đúng, score `[0, 1]`.
+- [x] Similar items loại chính nó.
+- [x] Fallback Popularity cho cold-start/không tín hiệu.
+- [x] Không đọc test data khi fit.
+- [x] Kết quả deterministic.
 
 ### Rating metrics
 
-- [ ] SVD có RMSE/MAE trên test.
-- [ ] `reports/metrics/svd.json` đúng schema, số liệu thật.
-- [ ] Baseline Day 1 giữ nguyên.
-- [ ] Không tune hyperparameter SVD trên test.
+- [x] SVD có RMSE/MAE trên test.
+- [x] `reports/metrics/svd.json` đúng schema, số liệu thật.
+- [x] Baseline Day 1 giữ nguyên.
+- [x] Không tune hyperparameter SVD trên test.
 
 ### Ranking metrics
 
-- [ ] Precision@K đúng công thức.
-- [ ] Recall@K đúng công thức.
-- [ ] NDCG@K đúng công thức.
-- [ ] Relevance threshold 4.0.
-- [ ] K = 5, 10, 20.
-- [ ] Macro-average trên user hợp lệ.
-- [ ] `ranking.json` có đủ 5 model.
-- [ ] Coverage@10 giữ nguyên định nghĩa.
+- [x] Precision@K đúng công thức.
+- [x] Recall@K đúng công thức.
+- [x] NDCG@K đúng công thức.
+- [x] Relevance threshold 4.0.
+- [x] K = 5, 10, 20.
+- [x] Macro-average trên user hợp lệ.
+- [x] `ranking.json` có đủ 5 model.
+- [x] Coverage@10 giữ nguyên định nghĩa.
 
 ### Service
 
-- [ ] `svd`, `hybrid` đã đăng ký.
-- [ ] `recommend` và `similar_items` hoạt động với 5 method.
-- [ ] `get_svd_metrics()` hoạt động.
-- [ ] Method không hỗ trợ raise `ValueError` rõ ràng, không còn “Day 4”.
-- [ ] App không import trực tiếp model.
+- [x] `svd`, `hybrid` đã đăng ký.
+- [x] `recommend` và `similar_items` hoạt động với 5 method.
+- [x] `get_svd_metrics()` hoạt động.
+- [x] Method không hỗ trợ raise `ValueError` rõ ràng, không còn “Day 4”.
+- [x] App không import trực tiếp model.
 
 ### App
 
-- [ ] Page 2 chọn 5 phương pháp.
-- [ ] Page 3 chọn 4 phương pháp similar.
-- [ ] Page 4 so sánh 5 phương pháp bằng tab.
-- [ ] Page 5 hiển thị rating + ranking 5 model.
-- [ ] Hiển thị method/reason.
-- [ ] User không tồn tại không crash.
-- [ ] `exclude_seen=True` hoạt động.
-- [ ] AppTest pass.
+- [x] Page 2 chọn 5 phương pháp.
+- [x] Page 3 chọn 4 phương pháp similar.
+- [x] Page 4 so sánh 5 phương pháp bằng tab.
+- [x] Page 5 hiển thị rating + ranking 5 model.
+- [x] Hiển thị method/reason.
+- [x] User không tồn tại không crash.
+- [x] `exclude_seen=True` hoạt động.
+- [x] AppTest pass.
 
 ### Test & tài liệu
 
-- [ ] `pytest -q` pass, số test tăng so với 67.
-- [ ] `ruff check .` pass.
-- [ ] CI xanh.
-- [ ] `run_svd_eval.py` chạy.
-- [ ] `run_ranking_eval.py` chạy.
-- [ ] `smoke_svd_hybrid.py` chạy.
-- [ ] README cập nhật Day 4.
-- [ ] `docs/evaluation_protocol.md` cập nhật.
-- [ ] Có `notes/day4_eval.md` và `notes/day4_report.md`.
-- [ ] Không commit data/model/secret.
-- [ ] PR có review.
+- [x] `pytest -q` pass, số test tăng so với 67.
+- [x] `ruff check .` pass.
+- [x] CI xanh.
+- [x] `run_svd_eval.py` chạy.
+- [x] `run_ranking_eval.py` chạy.
+- [x] `smoke_svd_hybrid.py` chạy.
+- [x] README cập nhật Day 4.
+- [x] `docs/evaluation_protocol.md` cập nhật.
+- [x] Có `notes/day4_eval.md` và `notes/day4_report.md`.
+- [x] Không commit data/model/secret.
+- [x] PR có review.
 
 ---
 

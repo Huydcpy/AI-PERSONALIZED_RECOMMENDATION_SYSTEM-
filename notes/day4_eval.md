@@ -48,7 +48,7 @@ Ranking thực tế: 18,35 giây cho toàn lệnh, gồm khởi tạo model, fit
 
 Không tune trên test, chưa có implicit feedback, score giữa phương pháp khác thang đo. Similar SVD có thể không gần nhau về thể loại vì dùng latent factors. Một split và một seed chưa chứng minh khác biệt có ý nghĩa thống kê. Không giảm K hoặc đổi pool theo test.
 
-Bàn giao cho Huy/Linh: scripts/run_svd_eval.py, scripts/run_ranking_eval.py, scripts/smoke_svd_hybrid.py, reports/metrics/svd.json, reports/metrics/ranking.json và docs/evaluation_protocol.md. Review chi tiết tại notes/day4_review.md. Chưa push, chưa mở PR, chưa có approval độc lập hoặc bằng chứng CI remote.
+Bàn giao cho Huy/Linh: scripts/run_svd_eval.py, scripts/run_ranking_eval.py, scripts/smoke_svd_hybrid.py, reports/metrics/svd.json, reports/metrics/ranking.json và docs/evaluation_protocol.md. Review chi tiết tại notes/day4_review.md. PR #15, #16 và #17 đã merge; `main` tại `184ecdd` và CI `main` xanh tại commit này. Không có approval độc lập; review là tích hợp trong cùng phiên. CI đã bổ sung `run_svd_eval.py` và `smoke_svd_hybrid.py` trong đợt hoàn thiện Day 4, cần xác nhận run mới sau push.
 
 ## Ví dụ thực tế
 
@@ -176,4 +176,4 @@ Top-5 dưới đây là prefix của recommend K=10; Hybrid phụ thuộc pool m
 
 ## Xác minh cuối
 
-106 tests pass, lint pass, smoke SVD/Hybrid pass. Chạy lại hai evaluator cho SHA-256 giống hệt ở cả svd.json và ranking.json. Baseline Day 1 không thay đổi. Checklist phần Phong trong task_day4_9_11.md đã được cập nhật; chưa đánh dấu phần Huy/Linh hoặc checklist chung.
+106 tests pass, lint pass, smoke SVD/Hybrid pass. Chạy lại hai evaluator cho SHA-256 giống hệt ở cả svd.json và ranking.json. Baseline Day 1 không thay đổi. Checklist Huy/Linh và checklist chung trong task_day4_9_11.md đã được cập nhật; chỉ còn mở hai mục PR description/screenshot do PR đã merge với body trống.

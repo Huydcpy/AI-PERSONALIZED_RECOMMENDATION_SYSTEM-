@@ -20,3 +20,7 @@ Ngày 09/11/2026, base ea4a550. Review cục bộ phần model của Huy và app
 - Smoke SVD/Hybrid pass; AppTest Day 4 pass.
 - Chạy lại cả rating và ranking evaluator: SHA-256 của svd.json và ranking.json giống lần đầu.
 - baseline.json không có diff; không thêm comment/docstring vào code mới.
+
+## Cập nhật sau merge (10/11/2026)
+
+PR #15, #16 và #17 đã merge vào `main` tại `184ecdd`; CI `main` xanh tại commit này. Trong đợt hoàn thiện Day 4, CI đã bổ sung `run_svd_eval.py` và `smoke_svd_hybrid.py`; README và `notes/day4_report.md` đã được cập nhật. Cần xác nhận CI trên commit mới sau khi push. Đây vẫn là review tích hợp trong cùng phiên làm việc, không phải approval độc lập.

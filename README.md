@@ -244,30 +244,69 @@ Report and all 3-user/3-movie examples: [Day 3 report](notes/day3_report.md). Pr
 | Model | RMSE | MAE | Ghi chú |
 |---|---:|---:|---|
 | Popularity (Bayesian average) | 1.06698 | 0.86310 | Giữ nguyên kết quả Day 1 (`reports/metrics/baseline.json`) |
-| SVD | (chưa có) | (chưa có) | Chạy `python scripts/run_svd_eval.py` để tạo `reports/metrics/svd.json` |
+| SVD | 0.956120 | 0.752447 | `n_factors=100`, `n_epochs=20`, `lr_all=0.005`, `reg_all=0.02`; fit train-only |
+
+SVD giảm khoảng 10,39% RMSE và 12,82% MAE so với Popularity. Không tune hyperparameter trên test; kết quả thật nằm trong `reports/metrics/svd.json`.
 
 ### Ranking Metrics (5 model)
 
-Dữ liệu 3 model đầu lấy từ `reports/metrics/ranking.json` (test relevance rating >= 4.0; macro-average over 456 users, 487 users skipped; K=5/10/20). SVD/Hybrid sẽ xuất hiện sau khi cập nhật và chạy `python scripts/run_ranking_eval.py`.
+Dữ liệu 5 model lấy từ `reports/metrics/ranking.json` (test relevance rating >= 4.0; macro-average over 456 users, 487 users skipped; K=5/10/20). Chạy `python scripts/run_ranking_eval.py` để tái lập.
 
 | Model | Precision@5 | Precision@10 | Recall@10 | NDCG@10 | Coverage@10 |
 |---|---:|---:|---:|---:|---:|
 | Popularity | 0.163158 | 0.164474 | 0.070910 | 0.174714 | 0.023187 |
 | Content-Based | 0.058772 | 0.047368 | 0.022264 | 0.055068 | 0.237812 |
 | Item-CF | 0.028947 | 0.029167 | 0.018530 | 0.031481 | 0.508323 |
-| SVD | (chưa có) | (chưa có) | (chưa có) | (chưa có) | (chưa có) |
-| Hybrid | (chưa có) | (chưa có) | (chưa có) | (chưa có) | (chưa có) |
+| SVD | 0.136842 | 0.127851 | 0.048426 | 0.137267 | 0.105826 |
+| Hybrid | 0.108333 | 0.100658 | 0.040805 | 0.109632 | 0.315101 |
+
+Popularity dẫn đầu NDCG@10; Item-CF dẫn đầu Coverage@10. SVD cải thiện dự đoán rating nhưng không vượt Popularity về ranking. Hybrid nằm giữa SVD và Content-Based/Item-CF về NDCG@10, đồng thời tăng coverage so với SVD.
 
 ### Ví dụ Top-5 gợi ý và Similar Movies (SVD, Hybrid)
 
-Chạy `python scripts/smoke_svd_hybrid.py` trong môi trường dự án (đã cài dependencies, có `data/processed`) để lấy ví dụ thực tế cho user 196 (Top-5 gợi ý, `k=5`, `exclude_seen=True`) và phim Toy Story / movie 1 (Top-5 Similar Movies). Giao diện Streamlit (Recommendations, Similar Movies, Compare Methods) hiển thị `method`, `score`, `reason` thực tế từ service.
+Chạy `python scripts/smoke_svd_hybrid.py` để tái lập. Giao diện Streamlit (Recommendations, Similar Movies, Compare Methods) hiển thị `method`, `score`, `reason` thực tế từ service.
 
-| Phương pháp | Ngữ cảnh | Ví dụ |
-|---|---|---|
-| SVD | Top-5 gợi ý (user 196) | Chạy `scripts/smoke_svd_hybrid.py` |
-| SVD | Top-5 tương tự (movie 1, Toy Story) | Chạy `scripts/smoke_svd_hybrid.py` |
-| Hybrid | Top-5 gợi ý (user 196) | Chạy `scripts/smoke_svd_hybrid.py` |
-| Hybrid | Top-5 tương tự (movie 1, Toy Story) | Chạy `scripts/smoke_svd_hybrid.py` |
+**SVD — user 196, Top-5 gợi ý (`k=5`, `exclude_seen=True`; reason: Dự đoán theo sở thích cá nhân (SVD))**
+
+| movie_id | Title | Score | Method |
+|---|---|---:|---|
+| 483 | Casablanca (1942) | 4.287311 | svd |
+| 408 | Close Shave, A (1995) | 4.278069 | svd |
+| 169 | Wrong Trousers, The (1993) | 4.265532 | svd |
+| 318 | Schindler's List (1993) | 4.255841 | svd |
+| 923 | Raise the Red Lantern (1991) | 4.253564 | svd |
+
+**Hybrid — user 196, Top-5 gợi ý (`k=5`, `exclude_seen=True`; reason: Kết hợp SVD + Item-CF + Content-Based)**
+
+| movie_id | Title | Score | Method |
+|---|---|---:|---|
+| 127 | Godfather, The (1972) | 0.602944 | hybrid |
+| 481 | Apartment, The (1960) | 0.500000 | hybrid |
+| 483 | Casablanca (1942) | 0.500000 | hybrid |
+| 408 | Close Shave, A (1995) | 0.487263 | hybrid |
+| 169 | Wrong Trousers, The (1993) | 0.469986 | hybrid |
+
+**SVD — similar to Toy Story (movie 1), Top-5 (reason: Cùng gu người dùng (SVD))**
+
+| movie_id | Title | Score | Method |
+|---|---|---:|---|
+| 45 | Eat Drink Man Woman (1994) | 0.405460 | svd |
+| 378 | Miracle on 34th Street (1994) | 0.348896 | svd |
+| 979 | Trigger Effect, The (1996) | 0.343406 | svd |
+| 174 | Raiders of the Lost Ark (1981) | 0.339268 | svd |
+| 1459 | Madame Butterfly (1995) | 0.335045 | svd |
+
+**Hybrid — similar to Toy Story (movie 1), Top-5 (reason: Kết hợp độ tương đồng SVD + Item-CF + Content-Based)**
+
+| movie_id | Title | Score | Method |
+|---|---|---:|---|
+| 174 | Raiders of the Lost Ark (1981) | 0.606314 | hybrid |
+| 50 | Star Wars (1977) | 0.356538 | hybrid |
+| 28 | Apollo 13 (1995) | 0.316084 | hybrid |
+| 45 | Eat Drink Man Woman (1994) | 0.312127 | hybrid |
+| 95 | Aladdin (1992) | 0.303779 | hybrid |
+
+Report: [Day 4 report](notes/day4_report.md). Protocol and full examples: [Day 4 evaluation](notes/day4_eval.md). Integration review: [Day 4 review](notes/day4_review.md). Raw metrics: `reports/metrics/svd.json`, `reports/metrics/ranking.json`.
 
 ### Hạn chế (Day 4)
 
@@ -278,10 +317,14 @@ Chạy `python scripts/smoke_svd_hybrid.py` trong môi trường dự án (đã 
 
 ### Smoke test & CI
 ```bash
+python scripts/run_svd_eval.py
+python scripts/run_ranking_eval.py
 python scripts/smoke_item_cf.py
 python scripts/smoke_svd_hybrid.py
 pytest -q
 ruff check .
 ```
 
-On Windows, building scikit-surprise 1.1.4 requires Microsoft C++ Build Tools. MSVC and Windows SDK are now installed locally; scikit-surprise 1.1.4 built successfully and all 41 tests pass after integrating the remote feature branch. The Surprise smoke script passes with RMSE 0.9540. If Windows console encoding fails on Vietnamese output, set `$env:PYTHONIOENCODING = "utf-8"` before running the script in PowerShell.
+CI chạy toàn bộ test, ranking evaluation, SVD rating evaluation và các smoke test (Content-Based, Item-CF, SVD/Hybrid, Surprise).
+
+On Windows, building scikit-surprise 1.1.4 requires Microsoft C++ Build Tools. MSVC and Windows SDK are now installed locally; scikit-surprise 1.1.4 built successfully and the full suite (106 tests) passes after integrating the remote feature branch. The Surprise smoke script passes with RMSE 0.9540. If Windows console encoding fails on Vietnamese output, set `$env:PYTHONIOENCODING = "utf-8"` before running the script in PowerShell.
