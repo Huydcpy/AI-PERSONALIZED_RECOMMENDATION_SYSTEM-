@@ -1,4 +1,5 @@
 import json
+import math
 from pathlib import Path
 
 import matplotlib
@@ -22,6 +23,25 @@ COLORS = ["#4c72b0", "#dd8452", "#55a868", "#c44e52", "#8172b3"]
 def load_json(path):
     with Path(path).open(encoding="utf-8") as handle:
         return json.load(handle)
+
+
+def validate_metrics():
+    for name, model in (("baseline", "popularity"), ("svd", "svd")):
+        data = load_json(METRICS / f"{name}.json")
+        if data.get("model") != model:
+            raise ValueError(f"Invalid model in {name}.json")
+        for metric in ("rmse", "mae"):
+            value = data.get(metric)
+            if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0:
+                raise ValueError(f"Invalid {metric} in {name}.json")
+    ranking = load_json(METRICS / "ranking.json")
+    if set(ranking.get("models", {})) != {key for key, _ in MODELS}:
+        raise ValueError("Ranking must contain exactly five expected models")
+    for key, _ in MODELS:
+        for metric in ("precision@5", "precision@10", "recall@10", "ndcg@10", "coverage@10"):
+            value = ranking["models"][key].get(metric)
+            if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or not 0 <= value <= 1:
+                raise ValueError(f"Invalid {key}: {metric}")
 
 
 def save(fig, name):
@@ -97,7 +117,7 @@ def plot_tradeoff():
         coverage = ranking["models"][key]["coverage@10"]
         ax.scatter(ndcg, coverage, s=90, color=color, label=label)
         ax.annotate(
-            label,
+            f"{label}\n({ndcg:.4f}, {coverage:.4f})",
             xy=(ndcg, coverage),
             xytext=(6, 6),
             textcoords="offset points",
@@ -106,12 +126,14 @@ def plot_tradeoff():
     ax.set_xlabel("NDCG@10")
     ax.set_ylabel("Coverage@10")
     ax.set_title("NDCG@10 vs Coverage@10")
+    ax.margins(x=0.3, y=0.2)
     ax.grid(alpha=0.25)
     ax.legend()
     save(fig, "day5_ndcg_vs_coverage.png")
 
 
 def main():
+    validate_metrics()
     plot_rating()
     plot_ranking_metric(
         "ndcg@10",

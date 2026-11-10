@@ -261,59 +261,59 @@ Chốt số liệu đánh giá cuối, tạo biểu đồ và phân tích lỗi,
 
 #### Task 1 — Tổng hợp số liệu cuối
 
-- [ ] Đọc `reports/metrics/baseline.json`, `svd.json`, `ranking.json`.
-- [ ] Kiểm tra schema và số model/metric.
-- [ ] Lập bảng rating:
+- [x] Đọc `reports/metrics/baseline.json`, `svd.json`, `ranking.json`.
+- [x] Kiểm tra schema và số model/metric.
+- [x] Lập bảng rating:
   - Popularity RMSE/MAE.
   - SVD RMSE/MAE.
   - Chênh lệch tuyệt đối và phần trăm.
-- [ ] Lập bảng ranking 5 model:
+- [x] Lập bảng ranking 5 model:
   - Precision@5, Precision@10, Recall@10, NDCG@10, Coverage@10.
   - Xếp hạng từng cột.
-- [ ] Ghi rõ Popularity tốt nhất NDCG@10; Item-CF tốt nhất Coverage@10.
-- [ ] Ghi rõ SVD cải thiện rating nhưng không vượt Popularity ranking.
-- [ ] Ghi rõ Hybrid không vượt SVD/Popularity về NDCG@10; coverage cao hơn SVD.
-- [ ] Kiểm tra 456 user đánh giá, 487 user bỏ, catalog 1.682.
-- [ ] Không sửa tay số liệu; nếu cần, đọc trực tiếp từ JSON.
+- [x] Ghi rõ Popularity tốt nhất NDCG@10; Item-CF tốt nhất Coverage@10.
+- [x] Ghi rõ SVD cải thiện rating nhưng không vượt Popularity ranking.
+- [x] Ghi rõ Hybrid không vượt SVD/Popularity về NDCG@10; coverage cao hơn SVD.
+- [x] Kiểm tra 456 user đánh giá, 487 user bỏ, catalog 1.682.
+- [x] Không sửa tay số liệu; nếu cần, đọc trực tiếp từ JSON.
 
 #### Task 2 — Biểu đồ cuối
 
-- [ ] Viết `scripts/make_day5_figures.py` hoặc tương đương.
-- [ ] Script đọc JSON, validate key/model, không đọc test/raw data.
-- [ ] Tạo tối thiểu 4 hình:
+- [x] Viết `scripts/make_day5_figures.py` hoặc tương đương.
+- [x] Script đọc JSON, validate key/model, không đọc test/raw data.
+- [x] Tạo tối thiểu 4 hình:
   - `reports/figures/day5_rating_rmse_mae.png`
   - `reports/figures/day5_ranking_ndcg10.png`
   - `reports/figures/day5_ranking_coverage10.png`
   - `reports/figures/day5_ndcg_vs_coverage.png`
-- [ ] Mỗi hình có title, axis label, value label, font đọc được.
-- [ ] Không dùng màu gây nhầm lẫn; thống nhất thứ tự model.
-- [ ] Chạy script 2 lần; xác nhận file tạo được, không lỗi.
-- [ ] Kiểm tra dung lượng PNG hợp lý (< 1 MB/hình nếu có thể).
+- [x] Mỗi hình có title, axis label, value label, font đọc được.
+- [x] Không dùng màu gây nhầm lẫn; thống nhất thứ tự model.
+- [x] Chạy script 2 lần; xác nhận file tạo được, không lỗi.
+- [x] Kiểm tra dung lượng PNG hợp lý (< 1 MB/hình nếu có thể).
 - [ ] Chèn link hình vào `notes/day5_eval.md` và báo Huy/Linh.
-- [ ] Không commit hình nếu hình quá lớn hoặc chứa dữ liệu nhạy cảm; MovieLens là dữ liệu công khai.
+- [x] Không commit hình nếu hình quá lớn hoặc chứa dữ liệu nhạy cảm; MovieLens là dữ liệu công khai.
 
 #### Task 3 — Phân tích lỗi và ví dụ định tính
 
-- [ ] Chạy smoke SVD/Hybrid để lấy ví dụ user 196 và phim 1/50/56.
-- [ ] So sánh top-5 giữa 5 phương pháp cho cùng user 196.
-- [ ] Ghi nhận khác biệt:
+- [x] Chạy smoke SVD/Hybrid để lấy ví dụ user 196 và phim 1/50/56.
+- [x] So sánh top-5 giữa 5 phương pháp cho cùng user 196.
+- [x] Ghi nhận khác biệt:
   - Popularity thiên về phim phổ biến.
   - Content-Based tạo nhiều tie theo genre.
   - Item-CF thưa, precision thấp.
   - SVD đa dạng latent nhưng có thể lệch genre.
   - Hybrid dung hòa nhưng bị dilution.
-- [ ] Kiểm tra fallback:
+- [x] Kiểm tra fallback:
   - User 999999.
   - User metadata-only.
   - Phim zero-interaction.
-- [ ] Ghi rõ fallback dùng Popularity và reason tương ứng.
-- [ ] Ghi hạn chế: một split/seed, chưa kiểm định thống kê.
+- [x] Ghi rõ fallback dùng Popularity và reason tương ứng.
+- [x] Ghi hạn chế: một split/seed, chưa kiểm định thống kê.
 - [ ] (Tuỳ chọn) Nếu còn thời gian, tính bootstrap 95% CI cho NDCG@10 trên 456 user; output `reports/metrics/uncertainty.json`; ghi rõ là phân tích thăm dò, không đổi metric chính.
-- [ ] Không tune threshold/K/trọng số từ kết quả.
+- [x] Không tune threshold/K/trọng số từ kết quả.
 
 #### Task 4 — Viết `notes/day5_eval.md`
 
-- [ ] Tạo file với các mục:
+- [x] Tạo file với các mục:
   - Protocol tóm tắt.
   - Bảng rating.
   - Bảng ranking.
@@ -322,19 +322,20 @@ Chốt số liệu đánh giá cuối, tạo biểu đồ và phân tích lỗi,
   - Fallback/error cases.
   - Hạn chế.
   - Kết luận.
-- [ ] Mọi số liệu khớp JSON.
-- [ ] Link tới `reports/metrics/*.json` và `reports/figures/day5_*.png`.
-- [ ] Ghi rõ “không tune trên test”.
+- [x] Mọi số liệu khớp JSON.
+- [x] Link tới `reports/metrics/*.json` và `reports/figures/day5_*.png`.
+- [x] Ghi rõ “không tune trên test”.
 - [ ] Ghi rõ “một split/seed, chưa kiểm định thống kê” nếu chưa làm bootstrap.
 - [ ] Review lại với Huy trước 15:00.
 
 #### Task 5 — Hỗ trợ demo/Q&A
 
-- [ ] Chuẩn bị 3–5 câu trả lời về metrics.
-- [ ] Giải thích vì sao Popularity có NDCG@10 cao.
-- [ ] Giải thích vì sao SVD RMSE tốt nhưng ranking không cao.
-- [ ] Giải thích coverage và popularity bias.
-- [ ] Chuẩn bị số liệu dự phòng nếu demo app lỗi.
+- [x] Chuẩn bị 3–5 câu trả lời về metrics.
+- [x] Giải thích vì sao Popularity có NDCG@10 cao.
+- [x] Giải thích vì sao SVD RMSE tốt nhưng ranking không cao.
+- [x] Giải thích coverage và popularity bias.
+- [x] Chuẩn bị số liệu dự phòng nếu demo app lỗi.
+
 
 ### 3.4 Lệnh kiểm tra của Phong
 
@@ -353,11 +354,11 @@ pytest tests/test_svd.py tests/test_hybrid.py tests/test_ranking_eval_script.py 
 
 ### 3.5 Tiêu chí hoàn thành
 
-- [ ] Bảng số liệu cuối đầy đủ, khớp JSON.
-- [ ] 4 hình PNG tồn tại và được dùng trong eval/report/slide.
-- [ ] `notes/day5_eval.md` hoàn chỉnh, có phân tích và hạn chế.
-- [ ] Fallback/error cases được ghi nhận.
-- [ ] Không có thay đổi model/hyperparameter/trọng số.
+- [x] Bảng số liệu cuối đầy đủ, khớp JSON.
+- [x] 4 hình PNG tồn tại và được dùng trong eval/report/slide.
+- [x] `notes/day5_eval.md` hoàn chỉnh, có phân tích và hạn chế.
+- [x] Fallback/error cases được ghi nhận.
+- [x] Không có thay đổi model/hyperparameter/trọng số.
 
 ### 3.6 Rủi ro & xử lý
 
@@ -371,10 +372,10 @@ pytest tests/test_svd.py tests/test_hybrid.py tests/test_ranking_eval_script.py 
 
 ### 3.7 Báo cáo cuối ngày
 
-- Đã xong: ...
-- Số liệu/hình: ...
-- Phát hiện chính: ...
-- Blocker: ...
+- Đã xong ngày 10/11/2026: tổng hợp và đối chiếu metrics, tạo lại 4 biểu đồ hai lần, phân tích Top-5 đủ 5 phương pháp, kiểm tra fallback, bổ sung eval và 5 câu Q&A.
+- Số liệu/hình: [day5_eval.md](day5_eval.md), [day5_phong_details.md](day5_phong_details.md); 4 PNG được liên kết trong eval, đều dưới 1 MB. 42 test chuyên biệt đạt, smoke SVD/Hybrid và Ruff đạt.
+- Phát hiện chính: Popularity dẫn đầu NDCG@10; SVD giảm RMSE 10,3905%; Item-CF có coverage cao nhất; Hybrid tăng coverage so với SVD nhưng giảm NDCG@10. Không tune trên test.
+- Còn lại: Huy review tài liệu, xác nhận bàn giao với Huy/Linh. Bootstrap là tùy chọn, chưa thực hiện; chưa kiểm định thống kê. Không có blocker kỹ thuật.
 
 ---
 
