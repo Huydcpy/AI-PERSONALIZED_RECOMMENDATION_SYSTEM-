@@ -117,6 +117,16 @@ SVD cải thiện khoảng 10,39% RMSE và 12,82% MAE so với Popularity (`n_fa
 
 Nhận xét: Popularity dẫn đầu NDCG@10; Item-CF dẫn đầu Coverage@10. SVD cải thiện rating prediction nhưng không vượt Popularity về ranking trên split này. Hybrid nằm giữa các component về NDCG@10 và tăng coverage so với SVD. Nguồn: `reports/metrics/ranking.json`.
 
+### Biểu đồ đánh giá
+
+| Rating | Ranking accuracy |
+|---|---|
+| ![Rating](reports/figures/day5_rating_rmse_mae.png) | ![NDCG](reports/figures/day5_ranking_ndcg10.png) |
+
+| Coverage | Trade-off |
+|---|---|
+| ![Coverage](reports/figures/day5_ranking_coverage10.png) | ![NDCG vs Coverage](reports/figures/day5_ndcg_vs_coverage.png) |
+
 ## Demo
 
 ### Dữ liệu mẫu sử dụng trong demo
@@ -182,9 +192,12 @@ Nhận xét: Popularity dẫn đầu NDCG@10; Item-CF dẫn đầu Coverage@10. 
 
 ## Tài liệu và ghi chú
 
+- Báo cáo cuối: [notes/day5_report.md](notes/day5_report.md)
+- Đánh giá cuối: [notes/day5_eval.md](notes/day5_eval.md)
+- Review tích hợp: [notes/day5_review.md](notes/day5_review.md)
 - Protocol đánh giá: `docs/evaluation_protocol.md`
 - Data card: `docs/data_card.md`
-- Ghi chú theo ngày: `notes/day1_report.md`, `notes/day2_eval.md`, `notes/day3_eval.md`, `notes/day4_report.md`, `notes/day4_eval.md`, `notes/day5_eval.md`
-- Kịch bản demo: `notes/demo_script.md`
-- Dàn ý slide: `notes/day5_slides.md`
+- Ghi chú theo ngày: `notes/day1_report.md`, `notes/day2_eval.md`, `notes/day3_eval.md`, `notes/day4_report.md`, `notes/day4_eval.md`
+- Kịch bản demo: [notes/demo_script.md](notes/demo_script.md)
+- Dàn ý slide: [notes/day5_slides.md](notes/day5_slides.md)
 - Metrics: `reports/metrics/baseline.json`, `reports/metrics/svd.json`, `reports/metrics/ranking.json`
