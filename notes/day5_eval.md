@@ -111,7 +111,7 @@ Smoke SVD/Hybrid kiểm tra user lạ 999999, user metadata-only 196 sau khi lo�
 - 42 test thuộc SVD, Hybrid và ranking evaluator đạt; Ruff đạt. Smoke SVD/Hybrid exit code 0, kiểm tra tính lặp lại trên 3 user và 3 phim, sai số vector hóa tối đa `8,88e-16`.
 - Đã chạy script biểu đồ hai lần thành công; SHA-256 của từng ảnh khớp giữa hai lần. Bốn PNG đều dưới 1 MB; biểu đồ trade-off được bổ sung nhãn giá trị. Script kiểm tra đúng model và metric hữu hạn trước khi vẽ, chỉ đọc JSON metrics.
 - Không thay đổi model, hyperparameter, trọng số, threshold hoặc K; không tune trên test. Một split/seed, chưa kiểm định thống kê; không thực hiện bootstrap tùy chọn.
-- Tài liệu và 4 hình đã sẵn sàng để Huy/Linh sử dụng. Chưa có xác nhận review trực tiếp của Huy trong phiên làm việc này; không ghi nhận thay approval hay khẳng định đã bàn giao qua tin nhắn.
+- Tài liệu và 4 hình đã sẵn sàng để Huy/Linh sử dụng. Huy đã review post-merge PR #21 và điền lại body PR; review ghi nhận việc PR được merge trước khi có review trực tiếp. Trạng thái bàn giao cuối: [day5_closeout.md](day5_closeout.md).
 
 ### Q&A cho Phong
 

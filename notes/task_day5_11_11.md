@@ -1,6 +1,8 @@
 # TASK DAY 5 — 11/11/2026
 
 > Trạng thái tại thời điểm lập kế hoạch: `main`/`origin/main` tại `184ecdd`, 106 test pass, 5 phương pháp đã tích hợp. Các thay đổi hoàn thiện Day 4 (README, `notes/day4_report.md`, CI, notes) đang ở working tree và chưa push; CI mới chưa chạy hai bước `run_svd_eval.py` và `smoke_svd_hybrid.py`. Cần chốt các thay đổi này trước khi bắt đầu Day 5.
+>
+> **Trạng thái cuối (12/11/2026):** dự án đã hoàn thành; PR #18, #19, #20, #21 đã merge, CI xanh và release đầy đủ là `v1.0.1`. File này giữ checklist kế hoạch gốc để truy vết; trạng thái thực tế, ngoại lệ và bằng chứng nằm trong [day5_closeout.md](day5_closeout.md).
 
 **Dự án:** AI Personalized Recommendation System (MovieLens 100K)
 
@@ -236,11 +238,11 @@ streamlit run app/Home.py
 
 ### 2.7 Báo cáo cuối ngày
 
-- Đã xong: ...
-- Kết quả kiểm chứng: ...
-- Số liệu chính: ...
-- Demo: ...
-- Blocker/đề xuất: ...
+- Đã xong: PR #18, #19, #20, #21 merge; báo cáo/eval/review/closeout; release `v1.0.0` và `v1.0.1`.
+- Kết quả kiểm chứng: 106 test pass, 42 test chuyên biệt pass, ruff pass, smoke pass, metric hash không đổi.
+- Số liệu chính: SVD RMSE `0.956120`, MAE `0.752447`; Popularity NDCG@10 `0.174714`; Item-CF Coverage@10 `0.508323`.
+- Demo: dry-run kỹ thuật 2 lần, 0,1285 giây và 0,1136 giây; không có rehearsal thuyết trình trực tiếp.
+- Blocker/đề xuất: không có blocker; release đầy đủ là `v1.0.1`.
 
 ---
 
@@ -289,7 +291,7 @@ Chốt số liệu đánh giá cuối, tạo biểu đồ và phân tích lỗi,
 - [x] Không dùng màu gây nhầm lẫn; thống nhất thứ tự model.
 - [x] Chạy script 2 lần; xác nhận file tạo được, không lỗi.
 - [x] Kiểm tra dung lượng PNG hợp lý (< 1 MB/hình nếu có thể).
-- [ ] Chèn link hình vào `notes/day5_eval.md` và báo Huy/Linh.
+- [x] Chèn link hình vào `notes/day5_eval.md` và báo Huy/Linh.
 - [x] Không commit hình nếu hình quá lớn hoặc chứa dữ liệu nhạy cảm; MovieLens là dữ liệu công khai.
 
 #### Task 3 — Phân tích lỗi và ví dụ định tính
@@ -325,8 +327,8 @@ Chốt số liệu đánh giá cuối, tạo biểu đồ và phân tích lỗi,
 - [x] Mọi số liệu khớp JSON.
 - [x] Link tới `reports/metrics/*.json` và `reports/figures/day5_*.png`.
 - [x] Ghi rõ “không tune trên test”.
-- [ ] Ghi rõ “một split/seed, chưa kiểm định thống kê” nếu chưa làm bootstrap.
-- [ ] Review lại với Huy trước 15:00.
+- [x] Ghi rõ “một split/seed, chưa kiểm định thống kê” nếu chưa làm bootstrap.
+- [x] Review lại với Huy trước 15:00 (thực tế review post-merge PR #21).
 
 #### Task 5 — Hỗ trợ demo/Q&A
 
@@ -375,7 +377,7 @@ pytest tests/test_svd.py tests/test_hybrid.py tests/test_ranking_eval_script.py 
 - Đã xong ngày 10/11/2026: tổng hợp và đối chiếu metrics, tạo lại 4 biểu đồ hai lần, phân tích Top-5 đủ 5 phương pháp, kiểm tra fallback, bổ sung eval và 5 câu Q&A.
 - Số liệu/hình: [day5_eval.md](day5_eval.md), [day5_phong_details.md](day5_phong_details.md); 4 PNG được liên kết trong eval, đều dưới 1 MB. 42 test chuyên biệt đạt, smoke SVD/Hybrid và Ruff đạt.
 - Phát hiện chính: Popularity dẫn đầu NDCG@10; SVD giảm RMSE 10,3905%; Item-CF có coverage cao nhất; Hybrid tăng coverage so với SVD nhưng giảm NDCG@10. Không tune trên test.
-- Còn lại: Huy review tài liệu, xác nhận bàn giao với Huy/Linh. Bootstrap là tùy chọn, chưa thực hiện; chưa kiểm định thống kê. Không có blocker kỹ thuật.
+- Đã đóng: Huy review post-merge, xác nhận bàn giao với Huy/Linh trong [day5_closeout.md](day5_closeout.md). Bootstrap là tùy chọn, chưa thực hiện; chưa kiểm định thống kê. Không có blocker kỹ thuật.
 
 ---
 
@@ -499,10 +501,10 @@ streamlit run app/Home.py
 
 ### 4.7 Báo cáo cuối ngày
 
-- Đã xong: ...
-- README/screenshot/demo: ...
-- PR/CI: ...
-- Blocker: ...
+- Đã xong: README, 5 screenshot, demo script, slide outline, AppTest.
+- README/screenshot/demo: Huy retake screenshot tại `b9a8620`; bổ sung figure/link trong PR #20; demo script và slide đã hoàn chỉnh.
+- PR/CI: PR #19 merge tại `d0ade04`, CI xanh tại `b9a8620`.
+- Blocker: không có live rehearsal; thay bằng dry-run kỹ thuật 2 lần và screenshot dự phòng.
 
 ---
 

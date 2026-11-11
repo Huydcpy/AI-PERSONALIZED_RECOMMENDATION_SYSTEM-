@@ -1,10 +1,10 @@
 # Báo cáo tổng kết — AI Personalized Recommendation System
 
-**Ngày:** 11/11/2026  
+**Ngày:** 12/11/2026 (chốt)  
 **Dataset:** MovieLens 100K  
 **Thành viên:** Huy (Trưởng nhóm), Phong, Linh  
-**Base tích hợp:** `main` sau PR #19  
-**Tài liệu liên quan:** [Đánh giá cuối](day5_eval.md), [Review tích hợp](day5_review.md), [Kịch bản demo](demo_script.md), [Dàn ý slide](day5_slides.md), [README](../README.md)
+**Base tích hợp:** `main` sau PR #21 (`2104c8b`); release `v1.0.1`  
+**Tài liệu liên quan:** [Đánh giá cuối](day5_eval.md), [Review tích hợp](day5_review.md), [Closeout](day5_closeout.md), [Chi tiết Phong](day5_phong_details.md), [Kịch bản demo](demo_script.md), [Dàn ý slide](day5_slides.md), [README](../README.md)
 
 ## 1. Tóm tắt
 
@@ -202,18 +202,20 @@ Kết quả dựa trên một split và một seed. Chưa có cross-validation, 
 
 ### 10.3 Kịch bản demo
 
-Demo 5–7 phút: Huy mở đầu/kiến trúc, Phong trình bày metrics, Linh demo app và fallback. Chi tiết tại [demo_script.md](demo_script.md); dàn ý slide tại [day5_slides.md](day5_slides.md).
+Demo 5–7 phút: Huy mở đầu/kiến trúc, Phong trình bày metrics, Linh demo app và fallback. Chi tiết tại [demo_script.md](demo_script.md); dàn ý slide tại [day5_slides.md](day5_slides.md). Không có rehearsal thuyết trình trực tiếp; đã chạy dry-run kỹ thuật 2 lần với service thật và chuẩn bị screenshot dự phòng.
 
 ## 11. Kiểm chứng và tái lập
 
 ### 11.1 Kết quả local
 
-- `pytest -q`: **106 passed**.
+- `pytest -q`: **106 passed** trong 9,82 giây.
+- Targeted SVD/Hybrid/ranking: **42 passed** trong 0,94 giây.
 - `ruff check .`: pass.
 - Smoke SVD/Hybrid, Item-CF, Content-Based, Surprise: pass.
 - SVD evaluation: khoảng 1,42 giây.
 - Ranking evaluation: khoảng 15,09 giây.
 - Warm service cho 12 lời gọi: khoảng 0,09 giây.
+- Demo dry-run 2 lần: 0,1285 giây và 0,1136 giây; signature giống hệt; 15 recommend + 12 similar + 5 fallback; `exclude_seen` OK.
 - Streamlit khởi động: HTTP 200.
 - AppTest: 5 phương pháp, Compare 5 tab/50 card, Evaluation 2 bảng.
 
@@ -236,7 +238,9 @@ python scripts/make_day5_figures.py
 
 - PR #18: Day 4 finalization, CI xanh, merge vào `main` tại `066bcd8`.
 - PR #19: README/screenshot/demo/slide Day 5, CI xanh tại `b9a8620`, merge vào `main` tại `d0ade04`.
-- PR Day 5 final: báo cáo, eval, review, biểu đồ; CI xanh trước merge.
+- PR #20: báo cáo, eval, review, biểu đồ; CI xanh tại `a35bd66`; merge tại `20178b4`; release `v1.0.0`.
+- PR #21: xác minh Phong; CI xanh tại `b4262ff`; merge tại `2104c8b`.
+- PR closeout: chốt trạng thái và release `v1.0.1`; CI xanh trước merge.
 - CI chạy lint, test, app boundary, ranking evaluation, SVD rating evaluation và các smoke test.
 
 ## 12. Hạn chế và hướng phát triển
@@ -294,7 +298,8 @@ Bài học:
 - Metrics: `reports/metrics/baseline.json`, `svd.json`, `ranking.json`
 - Figures: `reports/figures/day5_*.png`
 - Docs: `docs/evaluation_protocol.md`, `docs/data_card.md`
-- Notes: `notes/day5_eval.md`, `notes/day5_review.md`, `notes/demo_script.md`, `notes/day5_slides.md`
+- Notes: `notes/day5_eval.md`, `notes/day5_review.md`, `notes/day5_closeout.md`, `notes/day5_phong_details.md`, `notes/demo_script.md`, `notes/day5_slides.md`
+- Release: `v1.0.1` — <https://github.com/Huydcpy/AI-PERSONALIZED_RECOMMENDATION_SYSTEM-/releases/tag/v1.0.1>
 
 ### 15.2 Lệnh tổng hợp
 
@@ -316,6 +321,7 @@ streamlit run app/Home.py
 - 5 phương pháp tích hợp: hoàn thành.
 - Rating/ranking evaluation: hoàn thành.
 - App 5 trang: hoàn thành.
-- Báo cáo/eval/review: hoàn thành.
-- Demo script/slide/screenshot: hoàn thành.
+- Báo cáo/eval/review/closeout: hoàn thành.
+- Demo script/slide/screenshot: hoàn thành; rehearsal trực tiếp thay bằng dry-run kỹ thuật 2 lần.
 - CI và tái lập: hoàn thành.
+- Tag/release: hoàn thành; `v1.0.1` là release đầy đủ cuối cùng.
