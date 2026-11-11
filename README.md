@@ -195,6 +195,9 @@ Nhận xét: Popularity dẫn đầu NDCG@10; Item-CF dẫn đầu Coverage@10. 
 - Báo cáo cuối: [notes/day5_report.md](notes/day5_report.md)
 - Đánh giá cuối: [notes/day5_eval.md](notes/day5_eval.md)
 - Review tích hợp: [notes/day5_review.md](notes/day5_review.md)
+- Closeout dự án: [notes/day5_closeout.md](notes/day5_closeout.md)
+- Chi tiết xác minh của Phong: [notes/day5_phong_details.md](notes/day5_phong_details.md)
+- Release cuối: [v1.0.1](https://github.com/Huydcpy/AI-PERSONALIZED_RECOMMENDATION_SYSTEM-/releases/tag/v1.0.1)
 - Protocol đánh giá: `docs/evaluation_protocol.md`
 - Data card: `docs/data_card.md`
 - Ghi chú theo ngày: `notes/day1_report.md`, `notes/day2_eval.md`, `notes/day3_eval.md`, `notes/day4_report.md`, `notes/day4_eval.md`
