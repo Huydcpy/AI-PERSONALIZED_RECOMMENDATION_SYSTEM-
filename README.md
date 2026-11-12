@@ -1,29 +1,144 @@
 # AI Personalized Recommendation System
 
-Hệ thống gợi ý phim cá nhân hóa xây dựng trên bộ dữ liệu **MovieLens 100K**, triển khai pipeline end-to-end: **data → model → service → giao diện Streamlit**.
+[![CI](https://github.com/Huydcpy/AI-PERSONALIZED_RECOMMENDATION_SYSTEM-/actions/workflows/ci.yml/badge.svg)](https://github.com/Huydcpy/AI-PERSONALIZED_RECOMMENDATION_SYSTEM-/actions/workflows/ci.yml)
+[![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/release/python-3110/)
+[![Release](https://img.shields.io/github/v/release/Huydcpy/AI-PERSONALIZED_RECOMMENDATION_SYSTEM-?display_name=tag)](https://github.com/Huydcpy/AI-PERSONALIZED_RECOMMENDATION_SYSTEM-/releases)
 
-## Mục tiêu dự án
+Hệ thống gợi ý phim cá nhân hóa xây dựng trên **MovieLens 100K**, triển khai đầy đủ pipeline **data → model → service → giao diện Streamlit**. Dự án so sánh 5 phương pháp gợi ý trên cùng một protocol đánh giá, đồng thời phân tích cả **rating prediction** và **top-K ranking**.
 
-- Xây dựng pipeline dữ liệu sạch, chia train/test theo chuẩn `u1.base` / `u1.test` (80.000/20.000), chống leakage.
-- Triển khai 5 phương pháp gợi ý: Popularity, Content-Based, Item-CF, SVD, Hybrid.
-- Đánh giá bằng rating metrics (RMSE/MAE) và ranking metrics (Precision@K, Recall@K, NDCG@K, Coverage@K).
-- Cung cấp giao diện web để chọn user/phim, xem top-K gợi ý, phim tương tự, so sánh phương pháp và xem kết quả đánh giá.
+## Tổng quan
 
-## Quickstart
+- Pipeline dữ liệu tái lập: tải, tiền xử lý, validate và split `u1.base` / `u1.test` (80.000 / 20.000 ratings).
+- 5 phương pháp: Popularity, Content-Based, Item-CF, SVD và Hybrid.
+- Đánh giá rating bằng RMSE/MAE; đánh giá ranking bằng Precision@K, Recall@K, NDCG@K và Coverage@K.
+- Ứng dụng Streamlit 6 trang: Home, User Profile, Recommendations, Similar Movies, Compare Methods, Evaluation.
+- Kiểm soát leakage: chỉ fit và tạo lịch sử trên train; test chỉ dùng một lần để đánh giá.
+- Fallback cold-start tập trung tại service layer, đảm bảo app luôn trả kết quả hợp lệ.
+- 106 test tự động, lint bằng Ruff, CI chạy trên GitHub Actions.
+- Release ổn định: [v1.0.1](https://github.com/Huydcpy/AI-PERSONALIZED_RECOMMENDATION_SYSTEM-/releases/tag/v1.0.1).
 
-### 1. Cài dependencies
+### Kết quả nổi bật
 
-Yêu cầu Python 3.11.
+| Hạng mục | Kết quả chính |
+|---|---|
+| Rating prediction | SVD đạt RMSE `0.9561`, MAE `0.7524`; giảm `10,39%` RMSE và `12,82%` MAE so với Popularity |
+| Ranking accuracy | Popularity dẫn NDCG@10 với `0.1747`; SVD đạt `0.1373` |
+| Ranking coverage | Item-CF dẫn Coverage@10 với `0.5083`; Hybrid đạt `0.3151` |
+| Hybrid | NDCG@10 `0.1096`, Coverage@10 `0.3151`; cân bằng accuracy và coverage |
+| Ứng dụng | 6 trang Streamlit, hỗ trợ 5 phương pháp, so sánh model và xem metrics |
+
+## Kiến trúc hệ thống
+
+Luồng chính: **App → Service → Models**. Giao diện Streamlit không import trực tiếp `src.models`; mọi truy cập dữ liệu, model và metrics đều đi qua `RecommenderService`.
+
+```mermaid
+flowchart LR
+    U[Người dùng] --> A[Streamlit App]
+    A --> S[RecommenderService]
+    S --> M[Models]
+    S --> D[(Processed Data)]
+    S --> R[(Metrics JSON)]
+    M --> D
+    E[Evaluation Scripts] --> R
+    N[Notebooks / EDA] --> D
+```
+
+### Các lớp chính
+
+| Lớp | Thư mục | Trách nhiệm |
+|---|---|---|
+| Data | `src/data` | Tải dữ liệu, chuẩn hóa schema, validate, lưu Parquet, chia train/test |
+| Models | `src/models` | 5 recommender tuân theo contract chung `fit`, `recommend`, `similar_items` |
+| Evaluation | `src/evaluation` | Rating metrics, ranking metrics, kiểm tra tính hợp lệ của kết quả |
+| Service | `src/service` | `RecommenderService`: load dữ liệu, quản lý model, fallback, cung cấp metrics |
+| Presentation | `app` | Streamlit Home và 5 trang chức năng |
+| Scripts | `scripts` | Chạy baseline, SVD, ranking evaluation và smoke test |
+| Reports | `reports` | Metrics JSON và hình ảnh đánh giá |
+
+### Cấu trúc thư mục
+
+```text
+.
+├── app/
+│   ├── Home.py
+│   ├── components/
+│   └── pages/
+├── configs/
+│   └── config.yaml
+├── data/
+│   ├── raw/
+│   └── processed/
+├── docs/
+│   ├── data_card.md
+│   └── evaluation_protocol.md
+├── models/
+├── notebooks/
+│   └── 01_eda.ipynb
+├── reports/
+│   ├── figures/
+│   └── metrics/
+├── scripts/
+├── src/
+│   ├── data/
+│   ├── evaluation/
+│   ├── models/
+│   └── service/
+├── tests/
+├── notes/
+├── pyproject.toml
+├── requirements.txt
+└── README.md
+```
+
+`data/raw`, `data/processed`, `models/` và các artifact sinh ra trong quá trình chạy không được commit.
+
+## Phương pháp gợi ý
+
+| Phương pháp | Method key | Mô tả ngắn |
+|---|---|---|
+| Popularity | `popularity` | Bayesian average với `m=50`; dùng làm baseline và fallback |
+| Content-Based | `content_based` | Dựa trên 18 genre flags đã biết (bỏ `unknown`), cosine similarity và hồ sơ sở thích của user từ train |
+| Item-based Collaborative Filtering | `item_cf` | Tương đồng item-item từ adjusted cosine, `k_neighbors=50`, trên tương tác train |
+| Matrix Factorization | `svd` | Phân rã ma trận rating thành latent factors; dự đoán rating và xếp hạng |
+| Hybrid | `hybrid` | Kết hợp SVD, Item-CF và Content-Based với trọng số riêng cho recommend và similar |
+
+Hybrid dùng trọng số recommend `SVD 0.5 / Item-CF 0.3 / Content-Based 0.2`; trọng số similar `Item-CF 0.4 / SVD 0.3 / Content-Based 0.3`. Khi một component thiếu tín hiệu, service áp dụng fallback Popularity và giữ thang điểm native/fallback tách biệt.
+
+## Dữ liệu
+
+- **MovieLens 100K** từ GroupLens: 100.000 ratings, 943 users, 1.682 movies.
+- Explicit feedback, thang điểm nguyên `1–5`.
+- Split chuẩn `u1.base` / `u1.test`: 80.000 / 20.000 ratings.
+- Độ thưa xấp xỉ `93,70%`.
+- Nguồn: <https://files.grouplens.org/datasets/movielens/100k/>.
+- Data card chi tiết: [`docs/data_card.md`](docs/data_card.md).
+
+## Cài đặt và chạy
+
+### Yêu cầu
+
+- Python `3.11`
+- pip
+- Kết nối Internet ở lần tải dữ liệu đầu tiên
+
+### 1. Clone repository
+
+```bash
+git clone https://github.com/Huydcpy/AI-PERSONALIZED_RECOMMENDATION_SYSTEM-.git
+cd AI-PERSONALIZED_RECOMMENDATION_SYSTEM-
+```
+
+### 2. Tạo môi trường ảo và cài dependencies
 
 ```bash
 python3.11 -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 2. Chuẩn bị dữ liệu
+Trên Windows, kích hoạt môi trường bằng `.venv\Scripts\activate`.
 
-Tải và xử lý MovieLens 100K, tạo các file Parquet trong `data/processed/` và split train/test:
+### 3. Chuẩn bị dữ liệu
 
 ```bash
 python -m src.data.download
@@ -31,91 +146,80 @@ python -m src.data.preprocess
 python -m src.data.splits
 ```
 
-### 3. Chạy ứng dụng
+Dữ liệu sau xử lý được lưu trong `data/processed/` dưới dạng Parquet.
+
+### 4. Chạy ứng dụng
 
 ```bash
 streamlit run app/Home.py
 ```
 
-### 4. Chạy test và đánh giá
+Mặc định Streamlit mở giao diện tại `http://localhost:8501`.
+
+### 5. Chạy test và kiểm tra chất lượng
 
 ```bash
-# Unit tests và lint
 pytest -q
 ruff check .
+```
 
-# Rating prediction (Popularity, SVD)
+### 6. Chạy đánh giá và smoke test
+
+```bash
 python scripts/run_baseline.py
 python scripts/run_svd_eval.py
-
-# Ranking metrics (5 phương pháp)
 python scripts/run_ranking_eval.py
 
-# Smoke tests
 python scripts/smoke_content_based.py
 python scripts/smoke_item_cf.py
 python scripts/smoke_svd_hybrid.py
+python scripts/smoke_surprise.py
 ```
 
-Kết quả đánh giá được lưu tại `reports/metrics/baseline.json`, `reports/metrics/svd.json`, `reports/metrics/ranking.json`.
+Kết quả được ghi tại:
 
-## Kiến trúc hệ thống
+- `reports/metrics/baseline.json`
+- `reports/metrics/svd.json`
+- `reports/metrics/ranking.json`
 
-Luồng chính của hệ thống: **App → Service → Models**. Giao diện Streamlit không import trực tiếp `src.models`, mọi truy cập dữ liệu và suy luận đi qua `RecommenderService`.
+## Đánh giá
 
-```mermaid
-flowchart LR
-    U[Người dùng] --> A[Streamlit App\napp/Home.py + pages]
-    A --> S[RecommenderService\nsrc/service]
-    S --> M[Models\nPopularity / Content-Based / Item-CF / SVD / Hybrid]
-    S --> D[(Processed Data\nratings, movies, users, train, test)]
-    S --> R[(Metrics JSON\nbaseline / svd / ranking)]
-    M --> D
-    A --> V[Top-K gợi ý\nPhim tương tự\nSo sánh & Evaluation]
-```
+### Protocol
 
-### Các lớp chính
+- Fit model, tạo profile, similarity và lịch sử gợi ý **chỉ trên train**.
+- Test chỉ dùng cho đánh giá cuối; không chọn model, hyperparameter, trọng số, threshold hoặc K từ test.
+- Seed cố định `42`; các lần chạy lại chỉ nhằm kiểm tra tái lập.
+- Ranking relevance: `rating >= 4.0`; `K = 5/10/20`, K chính là `10`.
+- Ranking dùng candidate là toàn catalog trừ lịch sử train, không negative sampling.
+- Macro-average trên **456 users** có relevant item; **487 users** không có relevant item bị bỏ qua.
+- Coverage@10 tính trên toàn bộ **1.682 phim** trong catalog.
+- Chi tiết protocol: [`docs/evaluation_protocol.md`](docs/evaluation_protocol.md).
 
-- **Data layer (`src/data`)**: tải dữ liệu, chuẩn hóa schema, validate, lưu Parquet, chia train/test.
-- **Model layer (`src/models`)**: các recommender tuân theo contract chung (`fit`, `recommend`, `similar_items`), trả về `movie_id`, `title`, `score`, `method`, `reason`.
-- **Evaluation layer (`src/evaluation`)**: tính rating metrics và ranking metrics; kết quả ghi ra `reports/metrics/`.
-- **Service layer (`src/service`)**: `RecommenderService` là điểm truy cập duy nhất cho UI (load dữ liệu, quản lý model, xử lý fallback, cung cấp metrics).
-- **Presentation layer (`app/`)**: Streamlit app gồm Home, Recommendations, Similar Movies, Compare Methods, Evaluation.
-
-## Phương pháp gợi ý
-
-| Phương pháp | Method key | Mô tả ngắn |
-|---|---|---|
-| Popularity | `popularity` | Xếp hạng theo độ phổ biến (Bayesian average / số lượng rating); dùng làm baseline và fallback. |
-| Content-Based | `content_based` | Dựa trên đặc trưng thể loại phim (18 genres), cosine similarity, hồ sơ user từ train. |
-| Item-based Collaborative Filtering | `item_cf` | Dựa trên độ tương đồng item-item (adjusted cosine) từ tương tác train. |
-| Matrix Factorization (SVD) | `svd` | Phân rã ma trận rating (latent factors) để dự đoán điểm và xếp hạng. |
-| Hybrid | `hybrid` | Kết hợp tín hiệu từ SVD, Item-CF và Content-Based (recommend/similar có trọng số riêng). |
-
-## Kết quả đánh giá
-
-Protocol: train-only fit, test dùng một lần để đánh giá (không tune trên test). Ranking dùng relevance `rating >= 4.0`, `K = 5/10/20` (K chính 10), macro-average trên 456 users có relevant item, 487 users bị bỏ qua; coverage tính trên catalog.
-
-### Rating Prediction (RMSE / MAE)
+### Rating prediction
 
 | Model | RMSE | MAE | Nguồn |
 |---|---:|---:|---|
-| Popularity (Bayesian average) | 1.0669849661484991 | 0.8630965089060417 | `reports/metrics/baseline.json` (giữ nguyên baseline Day 1) |
-| SVD | 0.956119767639409 | 0.7524468775134182 | `reports/metrics/svd.json` |
+| Popularity (Bayesian average) | 1.066985 | 0.863097 | `reports/metrics/baseline.json` |
+| SVD | 0.956120 | 0.752447 | `reports/metrics/svd.json` |
 
-SVD cải thiện khoảng 10,39% RMSE và 12,82% MAE so với Popularity (`n_factors=100`, `n_epochs=20`, `lr_all=0.005`, `reg_all=0.02`, `seed=42`).
+SVD dùng `n_factors=100`, `n_epochs=20`, `lr_all=0.005`, `reg_all=0.02`, `seed=42`. So với Popularity, SVD giảm khoảng **10,39% RMSE** và **12,82% MAE** trên test.
 
-### Ranking Metrics (5 phương pháp, K chính = 10)
+### Ranking metrics
 
-| Model | Precision@5 | Precision@10 | Recall@10 | NDCG@10 | Coverage@10 |
-|---|---:|---:|---:|---:|---:|
-| Popularity | 0.163158 | 0.164474 | 0.070910 | 0.174714 | 0.023187 |
-| Content-Based | 0.058772 | 0.047368 | 0.022264 | 0.055068 | 0.237812 |
-| Item-CF | 0.028947 | 0.029167 | 0.018530 | 0.031481 | 0.508323 |
-| SVD | 0.136842 | 0.127851 | 0.048426 | 0.137267 | 0.105826 |
-| Hybrid | 0.108333 | 0.100658 | 0.040805 | 0.109632 | 0.315101 |
+| Model | Precision@10 | Recall@10 | NDCG@10 | Coverage@10 |
+|---|---:|---:|---:|---:|
+| Popularity | 0.164474 | 0.070910 | 0.174714 | 0.023187 |
+| Content-Based | 0.047368 | 0.022264 | 0.055068 | 0.237812 |
+| Item-CF | 0.029167 | 0.018530 | 0.031481 | 0.508323 |
+| SVD | 0.127851 | 0.048426 | 0.137267 | 0.105826 |
+| Hybrid | 0.100658 | 0.040805 | 0.109632 | 0.315101 |
 
-Nhận xét: Popularity dẫn đầu NDCG@10; Item-CF dẫn đầu Coverage@10. SVD cải thiện rating prediction nhưng không vượt Popularity về ranking trên split này. Hybrid nằm giữa các component về NDCG@10 và tăng coverage so với SVD. Nguồn: `reports/metrics/ranking.json`.
+Nhận xét chính:
+
+- Popularity dẫn NDCG@10 trên split này; SVD cải thiện rating prediction nhưng chưa vượt Popularity về ranking.
+- Item-CF có Coverage@10 cao nhất nhưng NDCG@10 thấp nhất.
+- Hybrid tăng coverage đáng kể so với SVD nhưng đánh đổi một phần NDCG@10.
+- Không có phương pháp tốt nhất cho mọi mục tiêu; lựa chọn model phải gắn với metric và mục tiêu sản phẩm.
 
 ### Biểu đồ đánh giá
 
@@ -129,23 +233,25 @@ Nhận xét: Popularity dẫn đầu NDCG@10; Item-CF dẫn đầu Coverage@10. 
 
 ## Demo
 
-### Dữ liệu mẫu sử dụng trong demo
+### Dữ liệu mẫu
 
-- **User:** 1, 196, 405
-- **Phim:** 1 (Toy Story, 1995), 50 (Star Wars, 1977), 56 (Pulp Fiction, 1994)
+- **Users:** `1`, `196`, `405`
+- **Movies:** `1` (Toy Story, 1995), `50` (Star Wars, 1977), `56` (Pulp Fiction, 1994)
 
-### Luồng demo gợi ý
+### Luồng demo
 
-- Chọn user và phương pháp (Popularity / Content-Based / Item-CF / SVD / Hybrid) để xem Top-K gợi ý.
-- Chọn phim để xem Similar Movies theo SVD và Hybrid (và các phương pháp hỗ trợ tương ứng).
-- So sánh 5 phương pháp trên cùng một user tại trang Compare Methods.
-- Xem RMSE/MAE và ranking metrics tại trang Evaluation.
+1. Chọn user và phương pháp tại **Recommendations** để xem top-K gợi ý.
+2. Chọn phim tại **Similar Movies** để xem các phim tương tự.
+3. So sánh 5 phương pháp trên cùng một user tại **Compare Methods**.
+4. Xem RMSE/MAE và ranking metrics tại **Evaluation**.
+5. Kiểm tra hồ sơ, lịch sử và thống kê người dùng tại **User Profile**.
 
 ### Fallback cases
 
-- **User mới / user không tồn tại / user không có lịch sử trong train:** hệ thống fallback về Popularity, hiển thị `method`/`reason` phản ánh thực tế.
-- **User thưa dữ liệu hoặc phim thiếu tín hiệu tương tác:** model có thể không đủ tín hiệu; service áp dụng fallback phù hợp (thường về Popularity) để vẫn trả kết quả.
-- **`exclude_seen=True`:** không trả về các phim user đã xem trong lịch sử.
+- **User mới, user không tồn tại hoặc không có lịch sử train:** fallback về Popularity; `method` và `reason` phản ánh kết quả thực tế.
+- **User hoặc phim thiếu tín hiệu tương tác:** service áp dụng fallback phù hợp để vẫn trả danh sách hợp lệ.
+- **`exclude_seen=True`:** không trả về phim user đã xem trong train.
+- **Score khác thang đo:** không so sánh trực tiếp raw score giữa các phương pháp hoặc giữa native/fallback.
 
 ### Ảnh chụp giao diện
 
@@ -157,50 +263,73 @@ Nhận xét: Popularity dẫn đầu NDCG@10; Item-CF dẫn đầu Coverage@10. 
 | Compare Methods | ![Compare Methods](reports/figures/day5_compare.png) |
 | Evaluation | ![Evaluation](reports/figures/day5_evaluation.png) |
 
-## Dataset
+## Tái lập và CI
 
-- **MovieLens 100K** (GroupLens): 100.000 ratings, 943 users, 1.682 movies.
-- Explicit feedback, thang điểm 1–5. Split chuẩn `u1.base` (80.000) / `u1.test` (20.000).
-- Độ thưa xấp xỉ 93,7%.
-- Nguồn: <https://files.grouplens.org/datasets/movielens/ml-100k.zip>
-- Sử dụng theo điều khoản của GroupLens; dữ liệu raw/processed và artifacts không được commit.
+Workflow CI tại `.github/workflows/ci.yml` chạy trên push/PR vào `main`, gồm:
 
-## Hạn chế và hướng phát triển
+1. Cài dependencies với Python 3.11.
+2. `ruff check .`.
+3. Kiểm tra boundary: `app/` không import trực tiếp `src.models`.
+4. Tải và chuẩn bị dữ liệu.
+5. `pytest -q` (106 tests).
+6. Ranking evaluation, SVD evaluation và các smoke test.
 
-### Hạn chế
+Để tái lập toàn bộ kết quả từ repository root:
 
-- Dữ liệu MovieLens 100K (1997–1998) không phản ánh sở thích hiện tại; chỉ có explicit feedback, thiếu implicit signals (click, thời gian xem).
-- Chỉ đánh giá trên một split/seed cố định; chưa có kiểm định thống kê hay cross-validation.
-- Đặc trưng nội dung chỉ dựa trên genre (thô), chưa khai thác mô tả, diễn viên, poster.
-- Dữ liệu thưa (~93,7%) và có popularity bias; các model có trade-off giữa độ chính xác ranking, rating prediction và coverage.
-- Thang điểm `score` khác nhau giữa các phương pháp (count/rating, cosine, predicted rating, blended score) nên không so sánh trực tiếp giá trị score.
+```bash
+python -m src.data.download
+python -m src.data.preprocess
+python -m src.data.splits
+pytest -q
+ruff check .
+python scripts/run_baseline.py
+python scripts/run_svd_eval.py
+python scripts/run_ranking_eval.py
+```
 
-### Hướng phát triển
+Raw data, processed data, model artifacts và metrics tạm không được commit; metrics chính thức được lưu trong `reports/metrics/`.
 
-- Bổ sung implicit feedback và đặc trưng nội dung phong phú (metadata, embedding).
-- Thử nghiệm thêm mô hình (ALS, Neural CF, two-tower) và chiến lược hybrid/re-ranking.
-- Đánh giá đa split, phân tích độ ổn định và fairness/bias.
-- Cải thiện trải nghiệm demo (giải thích gợi ý, latency, logging/monitoring).
+## Hạn chế
 
-## Phân công nhóm
+- MovieLens 100K được thu thập giai đoạn 1997–1998, không phản ánh đầy đủ sở thích hiện tại.
+- Chỉ có explicit feedback; chưa khai thác implicit signals như click, thời gian xem hoặc lượt bỏ qua.
+- Đặc trưng nội dung chỉ dựa trên genre, chưa dùng mô tả, diễn viên, đạo diễn hoặc poster embedding.
+- Dữ liệu thưa và có popularity bias; các model có trade-off giữa rating accuracy, ranking accuracy và coverage.
+- Kết quả chính dùng một split/seed cố định; chưa thực hiện cross-validation đầy đủ.
+- Thang điểm `score` khác nhau giữa các phương pháp nên chỉ so sánh thứ hạng và metric, không so sánh raw score.
 
-| Thành viên | Vai trò chính | Nội dung phụ trách tiêu biểu |
+## Hướng phát triển
+
+- Bổ sung implicit feedback, negative sampling và mô hình BPR/ALS.
+- Thử nghiệm Neural CF, AutoRec, VAE-CF, LightGCN hoặc two-tower.
+- Dùng metadata phong phú và embedding cho Content-Based.
+- Học trọng số Hybrid theo user/context thay vì trọng số cố định.
+- Đánh giá cross-validation, bootstrap confidence interval và kiểm định thống kê.
+- Đo fairness, diversity, novelty và exposure bias.
+- Cải thiện cold-start, caching, logging/monitoring và A/B testing.
+
+## Nhóm thực hiện
+
+| Thành viên | Vai trò | Phụ trách chính |
 |---|---|---|
-| Huy (Trưởng nhóm) | Integration & Final report | Tích hợp, kiểm chứng, báo cáo tổng hợp, review/merge, điều phối demo |
-| Phong | Data & Evaluation | Pipeline dữ liệu, protocol đánh giá, chạy metrics, phân tích kết quả và biểu đồ |
-| Linh | Product & Demo | Ứng dụng Streamlit, trải nghiệm người dùng, README, screenshot, kịch bản demo/slide |
+| Huy (Nhóm trưởng) | Integration & Final report | Tích hợp, kiểm chứng, báo cáo tổng hợp, review/merge, điều phối demo |
+| Nguyễn Quốc Phong | Data & Evaluation | Pipeline dữ liệu, protocol đánh giá, chạy metrics, phân tích kết quả và biểu đồ |
+| Phạm Văn Linh | Product & Demo | Ứng dụng Streamlit, trải nghiệm người dùng, README, screenshot, kịch bản demo/slide |
 
-## Tài liệu và ghi chú
+## Tài liệu
 
-- Báo cáo cuối: [notes/day5_report.md](notes/day5_report.md)
-- Đánh giá cuối: [notes/day5_eval.md](notes/day5_eval.md)
-- Review tích hợp: [notes/day5_review.md](notes/day5_review.md)
-- Closeout dự án: [notes/day5_closeout.md](notes/day5_closeout.md)
-- Chi tiết xác minh của Phong: [notes/day5_phong_details.md](notes/day5_phong_details.md)
-- Release cuối: [v1.0.1](https://github.com/Huydcpy/AI-PERSONALIZED_RECOMMENDATION_SYSTEM-/releases/tag/v1.0.1)
-- Protocol đánh giá: `docs/evaluation_protocol.md`
-- Data card: `docs/data_card.md`
-- Ghi chú theo ngày: `notes/day1_report.md`, `notes/day2_eval.md`, `notes/day3_eval.md`, `notes/day4_report.md`, `notes/day4_eval.md`
-- Kịch bản demo: [notes/demo_script.md](notes/demo_script.md)
-- Dàn ý slide: [notes/day5_slides.md](notes/day5_slides.md)
+- Báo cáo Day 5: [`notes/day5_report.md`](notes/day5_report.md)
+- Đánh giá cuối: [`notes/day5_eval.md`](notes/day5_eval.md)
+- Protocol đánh giá: [`docs/evaluation_protocol.md`](docs/evaluation_protocol.md)
+- Data card: [`docs/data_card.md`](docs/data_card.md)
+- Kịch bản demo: [`notes/demo_script.md`](notes/demo_script.md)
+- Dàn ý slide: [`notes/day5_slides.md`](notes/day5_slides.md)
 - Metrics: `reports/metrics/baseline.json`, `reports/metrics/svd.json`, `reports/metrics/ranking.json`
+- Release: [`v1.0.1`](https://github.com/Huydcpy/AI-PERSONALIZED_RECOMMENDATION_SYSTEM-/releases/tag/v1.0.1)
+- Repository: <https://github.com/Huydcpy/AI-PERSONALIZED_RECOMMENDATION_SYSTEM->
+
+## Ghi nhận
+
+- Dữ liệu MovieLens 100K do GroupLens Research, University of Minnesota cung cấp. Vui lòng đọc điều khoản sử dụng trong `data/raw/ml-100k/README` sau khi tải dữ liệu.
+- Dự án sử dụng thư viện [Surprise](https://surpriselib.com/) cho SVD và [Streamlit](https://streamlit.io/) cho giao diện demo.
+- Mã nguồn được thực hiện cho mục đích học tập và báo cáo cuối kỳ môn Học máy nâng cao. Vui lòng liên hệ nhóm trước khi tái sử dụng ngoài phạm vi học tập.
